@@ -1,11 +1,13 @@
-600e0f6cbc6effac7ed89e58bc68ded1 *DESCRIPTION
-033f5cfe50481384104140bb684312b3 *NAMESPACE
+6f90fcf6137397f40356e6cff5078639 *DESCRIPTION
+a1d293cf170cb94fb6127a88fc6d254f *NAMESPACE
+e67df755af75ea092bf04cbd0d523616 *R/complexity_analysis.R
 6f525ae707010ce4b533ea786e39e8ad *R/compress_space.R
 03f47ea133a09df142bd87004df863ab *R/equivalence_relation.R
 45b7320abf238cf141c98ed4870fa571 *R/estimate_number_hyperplanes.R
 5dc3e81c915a489b66960b770f804d6b *R/estimate_shattering.R
-8c2668273efe2b1cd37a58f64ff46b58 *R/run_test.R
+953a652b34b69a39a8cb50f22fa8f7aa *R/run_test.R
 f2353d36b5249f3ad41b29938bf35580 *R/shattering.R
+64f8965e1e03898d12f55c2afa3823ad *man/complexity_analysis.Rd
 745d46010de7671043e5aeab911227c7 *man/compress_space.Rd
 365c1a8a1fd3ecf6c0012d2b4fb14029 *man/equivalence_relation.Rd
 96a4846c2fe0801a5f132a3de4a93445 *man/estimate_number_hyperplanes.Rd

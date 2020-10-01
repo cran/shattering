@@ -34,8 +34,8 @@
 #' @export
 run_test <- function(mean=c(-1,1), n=100, length=5, quantile.percentage=1, plot=TRUE, epsilon=1e-7) {
 
-	oldpar <- par(no.readonly = TRUE)
-	on.exit(par(oldpar))
+	oldpar <- graphics::par(no.readonly = TRUE)
+	on.exit(graphics::par(oldpar))
 
 	# Creating a synthetic dataset
 	data = cbind(stats::rnorm(mean=mean[1], sd=1, n=n), stats::rnorm(mean=mean[1], sd=1, n=n), rep(1, n))
