@@ -2,7 +2,7 @@
 % Please edit documentation in R/compress_space.R
 \name{compress_space}
 \alias{compress_space}
-\title{Function to compress the space given the equivalence relations.}
+\title{Function to compress the space based on the equivalence relations.}
 \usage{
 compress_space(M, Y)
 }
@@ -12,7 +12,7 @@ compress_space(M, Y)
 \item{Y}{numerical vector indentifying the output space of variables}
 }
 \value{
-A list containing sparse vectors (from package Matrix) identifying the equivalence relations
+A list containing sparse vectors (from package slam) identifying the equivalence relations
 }
 \description{
 This function compresses the input space according to the equivalence relations, i.e., it compresses whenever an example has other elements inside its open ball but having the same class label as the ball-centered instance.

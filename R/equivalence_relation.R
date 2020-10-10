@@ -1,36 +1,49 @@
-#' Function to assess all equivalence relations.
+#' Function to compute equivalence relations among input space points.
 #'
 #' This function computes the greatest as possible open ball connecting a given input example to every other under the same class label, thus homogeneizing space regions.
 #' @param X matrix indentifying the input space of variables
 #' @param Y numerical vector indentifying the output space of variables
 #' @param quantile.percentage real number to define the quantile of distances to be considered (e.g. 0.1 means 10%)
 #' @param epsilon a real threshold to be removed from distances in order to measure the open balls in the underlying topology
+#' @param chunk number of elements to compute the Euclidean distances at once (if you set a large number, you might have memory limitations to perform the operations)
 #' @return A list with the equivalence relations in form of a list
 #' @keywords equivalence relation
 #' @export
-equivalence_relation <- function(X, Y, quantile.percentage=0.05, epsilon=1e-7) {
-	distance = -Inf
+equivalence_relation <- function(X, Y, quantile.percentage=1, epsilon=1e-7, chunk=250) {
+
 	radius = rep(0, nrow(X))
 	for (c in unique(Y)) {
 		ids = which(c == Y)
-		radius[ids] = as.numeric(FNN::knnx.dist(X[setdiff(1:nrow(X), ids),], query=X[ids,], k=1, algorithm="kd_tree")) - epsilon
-		dist = as.numeric(stats::quantile(radius[ids], quantile.percentage))
-		if (dist > distance) { 
-			distance = dist
-		}
+		radius[ids] = 
+		   as.numeric(FNN::knnx.dist(X[setdiff(1:nrow(X), ids),], query=X[ids,], k=1, algorithm="kd_tree")) - epsilon
 	}
+	# Considering the distances up to a given quantile
+	distance = as.numeric(stats::quantile(radius, quantile.percentage))
 
+	# This filters out the closest distances to be considered in our analysis
 	ids = which(radius <= distance)
+
+	# Subspace of elements considered in our analysis
 	radius = radius[ids]
 	X = X[ids,]
 	Y = Y[ids]
 
-	M <- 1:nrow(X)
-	R = lapply(M, function(id) {
-			pos = which(as.numeric(pdist::pdist(X, indices.A=id, indices.B = 1:nrow(X))@dist) < radius[id] & Y[id] == Y)
-			r = Matrix::sparseVector(i=pos, length=nrow(X))
-			return (r)
-		})
+	R = list()
+	for (c in unique(Y)) {
+		ids = which(c == Y)
+		for (sub in seq(1, length(ids), by=chunk)) {
+			elements = sub:(sub+chunk-1)
+			if (sub+chunk-1 > length(ids)) {
+				elements = sub:length(ids)
+			}
+			all.dists = matrix(as.numeric(pdist::pdist(X, indices.A=ids[elements], 
+								   indices.B=1:nrow(X))@dist), byrow=T, ncol=nrow(X))
+			for (i in 1:nrow(all.dists)) {
+				pos = which(all.dists[i,] < radius[ids[elements[i]]]) 
+				R[[ ids[elements[i]] ]] = slam::simple_sparse_array(i=pos, v=rep(1, length(pos)), dim=nrow(X))
+			}
+		}
+	}
 
 	return (R)
 }

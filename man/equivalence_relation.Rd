@@ -2,9 +2,15 @@
 % Please edit documentation in R/equivalence_relation.R
 \name{equivalence_relation}
 \alias{equivalence_relation}
-\title{Function to assess all equivalence relations.}
+\title{Function to compute equivalence relations among input space points.}
 \usage{
-equivalence_relation(X, Y, quantile.percentage = 0.05, epsilon = 1e-07)
+equivalence_relation(
+  X,
+  Y,
+  quantile.percentage = 1,
+  epsilon = 1e-07,
+  chunk = 250
+)
 }
 \arguments{
 \item{X}{matrix indentifying the input space of variables}
@@ -14,6 +20,8 @@ equivalence_relation(X, Y, quantile.percentage = 0.05, epsilon = 1e-07)
 \item{quantile.percentage}{real number to define the quantile of distances to be considered (e.g. 0.1 means 10\%)}
 
 \item{epsilon}{a real threshold to be removed from distances in order to measure the open balls in the underlying topology}
+
+\item{chunk}{number of elements to compute the Euclidean distances at once (if you set a large number, you might have memory limitations to perform the operations)}
 }
 \value{
 A list with the equivalence relations in form of a list

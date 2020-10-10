@@ -59,6 +59,7 @@ estimate_number_hyperplanes <- function(X, Y, length=20, quantile.percentage=0.0
 		C = compress_space(M, Y[1:i])
 
 		# Computing the Big Omega and Big O bounds for the number of hyperplanes
+		# according to the theoretical results by Har-Peled and Jones
 		lower = length(C)^(2 / (ncol(X[1:i,]) + 1)) * log(log(length(C))) / log(length(C))
 		upper = ncol(X[1:i,]) * length(C)^(2 / (ncol(X[1:i,]) + 1))
 
@@ -67,8 +68,8 @@ estimate_number_hyperplanes <- function(X, Y, length=20, quantile.percentage=0.0
 
 	f = as.data.frame(f)
 	colnames(f) = c("n", "reduced", "Big.Omega", "Big.O")
-	regression = stats::lm(reduced ~ n, data=f)
-
+	regression = stats::lm(reduced ~ n, data=f) 
+						    
 	ret = list()
 	ret$regression = regression
 	ret$estimation = f

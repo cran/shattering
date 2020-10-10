@@ -23,11 +23,11 @@
 #' # complexity_analysis(X=as.matrix(iris[,1:4]), Y=as.numeric(iris[,5]))
 #' @export
 complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05, 
-				directory=tempdir(), file="myreport", length=10, 
+				directory=tempdir(), file="myreport", length=5, 
 				quantile.percentage=0.5, epsilon=1e-7) {
 
-	#oldpar <- graphics::par(no.readonly = TRUE)
-	#on.exit(graphics::par(oldpar))
+	oldpar <- graphics::par(no.readonly = TRUE)
+	on.exit(graphics::par(oldpar))
 
 	if (is.null(X) || is.null(Y)) {
 		return ("Parameters X and Y must be defined.")
@@ -54,17 +54,20 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	Y = as.numeric(Y)
 
 	Hyperplanes = estimate_number_hyperplanes(as.matrix(X), Y, length, quantile.percentage, epsilon)
-	Shattering = estimate_shattering(Hyperplanes$estimation)
 
 	ret = list()
 	ret$number.hyperplanes = Hyperplanes
-	ret$shattering.coefficient = Shattering
 
+	#cat("Generating the PDF report file.\n")
 	######################################################################################################
 	# Generating the PDF report file
 	######################################################################################################
 	## PAGE 1
 	conn = base::file(base::paste(directory, "/", file, ".Rmd", sep=""), "w")
+	#base::writeLines("---\n", conn)
+	#base::writeLines("fontsize: 11pt\n", conn)
+	#base::writeLines("geometry: margin=0.5in: 11pt\n", conn)
+	#base::writeLines("---\n", conn)
 	base::writeLines("# Package Shattering\n", conn)
 	base::writeLines("This document reports an analysis on the shattering coefficient for your supervised dataset. This is helpful in terms of understanding the complexity of your data, the number of hyperplanes required to perform the classification task, and the minimal training sample size to ensure proper learning bounds (i.e. to ensure your model will perform similarly on unseen examples).\n", conn)
 	base::writeLines("**Available at** [\\textcolor{blue}{https://cran.r-project.org/web/packages/shattering}](https://cran.r-project.org/web/packages/shattering)\n", conn)
@@ -84,7 +87,7 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 
 	## PAGE 2
 	base::writeLines("\\newpage ## Number of homogeneous-class regions\n", conn)
-	base::writeLines(base::paste("[\\textcolor{blue}{Our approach}](https://arxiv.org/pdf/1911.05461.pdf) estimates the number of homogeneous-class examples at space neighborhoods before computing the minimum number of hyperplanes to separate every point from any other using the theoretical result by [\\textcolor{blue}{Har-Peled and Jones}](https://arxiv.org/abs/1706.02004) which finds the saparability of some dataset as the sample size increases. We then use such growth function of homogeneous-class space regions to:\n", sep=""), conn)
+	base::writeLines(base::paste("[\\textcolor{blue}{Our approach}](https://arxiv.org/pdf/1911.05461.pdf) estimates the number of homogeneous-class examples at space neighborhoods before computing the minimum number of hyperplanes to separate every point from any other using the theoretical result by [\\textcolor{blue}{Har-Peled and Jones}](https://arxiv.org/abs/1706.02004) which finds the separability of some dataset as the sample size increases. We then use such growth function of homogeneous-class space regions to:\n", sep=""), conn)
 	base::writeLines(base::paste("\\begin{itemize}\n", sep=""), conn)
 	base::writeLines(base::paste("\\item understand how the class overlapping or class mixing happens as the sample size increases. For instance, if you have a linear slope equals to $0.1$, it means that $10$\\% of examples appear in such overlapping region so that an average accuracy of $0.9$ or $90$\\% is expected;\n", sep=""), conn)
 	base::writeLines(base::paste("\\item estimate the number of hyperplanes required to provide the separability of this dataset. This term separability is used by Har-Peled and Jones to determine the number of hyperplanes necessary to separate each input space element from any other but, in our case, this is related to the separation of homogeneous-class regions.\n", sep=""), conn)
@@ -112,7 +115,7 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	base::writeLines(base::paste("$$\\Omega(n^\\frac{2}{d+1} \\log \\log{n} / \\log{n}) = \\alpha h(n)^\\frac{2}{", ncol(X)+1, "} \\log \\log{h(n)} / \\log{h(n)}$$\n", sep=""), conn)
 	t_h_n = base::paste(sprintf("%.5f", as.numeric(ret$number.hyperplanes$regression$coefficients[2])), " * n + ", sprintf("%.5f", as.numeric(ret$number.hyperplanes$regression$coefficients[1])), sep="")
 	h_n = base::paste(sprintf("%.5f", as.numeric(ret$number.hyperplanes$regression$coefficients[2])), " \\times n + ", sprintf("%.5f", as.numeric(ret$number.hyperplanes$regression$coefficients[1])), sep="")
-	base::writeLines(base::paste("$$\\Omega(n^\\frac{2}{d+1} \\log \\log{n} / \\log{n}) = \\alpha (", h_n, ")^\\frac{2}{", ncol(X)+1, "} \\log \\log{(", h_n, ")} / \\log{(", h_n, ")}.$$\n", sep=""), conn)
+	base::writeLines(base::paste("$$\\resizebox{\\textwidth}{!}{$\\Omega(n^\\frac{2}{d+1} \\log \\log{n} / \\log{n}) = \\alpha (", h_n, ")^\\frac{2}{", ncol(X)+1, "} \\log \\log{(", h_n, ")} / \\log{(", h_n, ")}.$}$$\n", sep=""), conn)
 	base::writeLines(base::paste("While the upper bound is given by:\n", sep=""), conn)
 	base::writeLines(base::paste("$$O(d n^\\frac{2}{d+1}) = \\beta n^\\frac{2}{d+1} = \\beta h(n)^\\frac{2}{d+1}$$\n", sep=""), conn)
 	base::writeLines(base::paste("$$O(d n^\\frac{2}{d+1}) = \\beta (", h_n, ")^\\frac{2}{", ncol(X)+1, "},$$\n", sep=""), conn)
@@ -129,7 +132,7 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	lower_h_n = base::paste("2^Omega", sep="")
 
 	full_lower_h_n = base::paste("2^(1 * (", ncol(X), "*", t_h_n, ")^(2/(", ncol(X)+1, ")) * Ln(Ln(", t_h_n, ")) / Ln(", t_h_n,"))", sep="")
-	full_upper_h_n = base::paste("2^(1 * (", ncol(X), "*", t_h_n, ")^(2/(", ncol(X)+1, ")))", sep="") # FIXME: falta a dimensão do espaço aqui
+	full_upper_h_n = base::paste("2^(1 * (", ncol(X), "*", t_h_n, ")^(2/(", ncol(X)+1, ")))", sep="") 
 
 	base::writeLines(base::paste("$$2^{O(d n^\\frac{2}{d+1})} = 2^{\\beta h(n)^\\frac{2}{", ncol(X)+1, "}}$$\n", sep=""), conn)
 	upper_h_n = base::paste("2^O", sep="")
@@ -158,9 +161,11 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 			t = base::paste(t," * ", sep="")
 		}
 	
-		lower = base::paste(lower, "-c", i, sep="")
+		#lower = base::paste(lower, "-c", i, sep="")
+		lower = base::paste(lower_h_n, "-Sum(i,c1,c", i, ",i)", sep="")
 	}
 	func = base::paste(func, t, pracma::strcat(rep(")", length(unique(Y)))), sep="")
+	#ryacas_shattering_lower = func
 	shattering_lower = Ryacas::tex(Ryacas::yac_symbol(func))
 
 	###########################
@@ -179,40 +184,51 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 			t = base::paste(t," * ", sep="")
 		}
 	
-		upper = base::paste(upper, "-c", i, sep="")
+		#upper = base::paste(upper, "-c", i, sep="")
+		upper = base::paste(upper_h_n, "-Sum(i,c1,c", i, ",i)", sep="")
 	}
 	func = base::paste(func, t, pracma::strcat(rep(")", length(unique(Y)))), sep="")
+	#ryacas_shattering_upper = func
 	shattering_upper = Ryacas::tex(Ryacas::yac_symbol(func))
 
 	## PAGE 5
 	base::writeLines(base::paste("\\newpage ## Solving the lower and upper bounds for the Shattering coefficient\n", sep=""), conn)
 	base::writeLines(base::paste("For this dataset, the lower bound for the Shattering coefficient function is:\n", sep=""), conn)
-	base::writeLines(base::paste("$$", shattering_lower, ".$$\n", sep=""), conn)
+	base::writeLines(base::paste("$$\\resizebox{\\textwidth}{!}{$", shattering_lower, "$}.$$\n", sep=""), conn)
 
 	base::writeLines(base::paste("While the upper bound for the Shattering coefficient function is:\n", sep=""), conn)
-	base::writeLines(base::paste("$$", shattering_upper, ".$$\n", sep=""), conn)
+	base::writeLines(base::paste("$$\\resizebox{\\textwidth}{!}{$", shattering_upper, "$}.$$\n", sep=""), conn)
 	base::writeLines(base::paste("Having $n > 0$, and $O$ and $\\Omega$ as previously defined.\n", sep=""), conn)
-	#base::writeLines(base::paste("We suggest you to use Mathematica or Maxima (or any other similar software) to simplify even more those Shattering coefficient functions defining the lower and the upper bounds.\n", sep=""), conn)
 
-	grDevices::jpeg(filename = base::paste(directory, "/shattering.jpg", sep=""), width = 480, height = 480, units = "px", pointsize = 12, quality = 100, bg = "white")
-	base::plot(cbind(ret$number.hyperplanes$estimation[,"n"], ret$shattering.coefficient[,"lower.bound"]), main="Shattering along the original dataset size\n (lower bound in black and upper bound in red)", xlab="Sample size", ylab="Estimated Shattering value", t="l", ylim=range(ret$shattering.coefficient))
-	graphics::lines(cbind(ret$number.hyperplanes$estimation[,"n"], ret$shattering.coefficient[,"upper.bound"]), col=2)
-	grDevices::dev.off()
-	base::writeLines(base::paste("![Shattering evaluated along the sample size](", directory, "/shattering.jpg){width=40%}\n", sep=""), conn)
-	base::writeLines(base::paste("This chart (whenever the sample size allows, sometimes it grows too fast) is just an illustration of both lower and upper Shattering coefficient functions.\n", sep=""), conn)
+	#shattering.estimation = NULL
+	#for (n in c(2:3)) {
+	#	Ryacas::yac(Ryacas::yac_symbol(base::paste("n:=", n, sep="")))
+	#	Ryacas::yac(Ryacas::yac_symbol(base::paste("O:=", full_upper_h_n, sep="")))
+	#	Ryacas::yac(Ryacas::yac_symbol(base::paste("Omega:=", full_lower_h_n, sep="")))
+	#	lower.estimation = as.numeric(Ryacas::yac(Ryacas::yac_symbol(ryacas_shattering_lower)))
+	#	upper.estimation = as.numeric(Ryacas::yac(Ryacas::yac_symbol(ryacas_shattering_upper)))
+	#	shattering.estimation = rbind(shattering.estimation, c(n, lower.estimation, upper.estimation))
+	#}
+	#
+	#grDevices::jpeg(filename = base::paste(directory, "/shattering.jpg", sep=""), width = 480, height = 480, units = "px", pointsize = 12, quality = 100, bg = "white")
+	#base::plot(cbind(shattering.estimation[,"n"], shattering.estimation[,"upper.bound"]), main="Shattering along the original dataset size\n (lower bound in black and upper bound in red)", xlab="Sample size", ylab="Estimated Shattering value", t="l", col=2)
+	#graphics::lines(cbind(shattering.estimation[,"n"], shattering.estimation[,"lower.bound"]), col=1)
+	#grDevices::dev.off()
+	#base::writeLines(base::paste("![Shattering evaluated along the sample size](", directory, "/shattering.jpg){width=40%}\n", sep=""), conn)
+	#base::writeLines(base::paste("This chart is just an illustration of both lower and upper Shattering coefficient functions.\n", sep=""), conn)
 
 	## PAGE 6
 	base::writeLines(base::paste("\\newpage ## Generalization bound\n", sep=""), conn)
 	base::writeLines(base::paste("Now you can use the [\\textcolor{blue}{Generalization bound}](https://www.springer.com/gp/book/9780387987804) to understand the minimal training sample sizes to ensure learning guarantees according to the [\\textcolor{blue}{Statistical Learning Theory}](https://www.springer.com/gp/book/9783319949888):\n", sep=""), conn)
 	base::writeLines(base::paste("$$R(f) \\leq R_\\text{emp}(f) + \\sqrt{\\frac{4}{n} \\left( \\log{2\\mathcal{N}(\\mathcal{F},2n)} - \\log{\\delta} \\right)},$$\n", sep=""), conn)
-	base::writeLines(base::paste("for the (expected) risk $R(f)$, the empirical risk (or sample error) $R_\\text{emp}(f)$, provided some probility $\\delta$ (whose $1-\\delta$ corresponds to the confidence you wish to ensure for the [\\textcolor{blue}{uniform convergece over the space of admissible functions}](https://www.springer.com/gp/book/9783319949888) used by your supervised learning algorithm). Term $f$ corresponds to the classifier found by your algorithm after the learning stage and $\\mathcal{N}(\\mathcal{F},2n)$ is the Shattering coefficient function.\n", sep=""), conn)
+	base::writeLines(base::paste("for the (expected) risk $R(f)$, the empirical risk (or sample error) $R_\\text{emp}(f)$, provided some probility $\\delta$ (whose $1-\\delta$ corresponds to the confidence you wish to ensure for the [\\textcolor{blue}{uniform convergence over the space of admissible functions}](https://www.springer.com/gp/book/9783319949888) used by your supervised learning algorithm). Term $f$ corresponds to the classifier found by your algorithm after the learning stage and $\\mathcal{N}(\\mathcal{F},2n)$ is the Shattering coefficient function.\n", sep=""), conn)
 	base::writeLines(base::paste("We suggest you to apply the lower and upper bounds for the Shattering coefficient function in this Generalization bound so you can study how the Risk (expected value of the loss function on the joint probability distribution forming your dataset) behaves, as follows:\n", sep=""), conn)
-	base::writeLines(base::paste("$$R_\\text{emp}(f) + \\sqrt{\\frac{4}{n} \\left\\{ \\log{\\left(2 ", shattering_lower, "\\right)} - \\log{\\delta} \\right\\}}$$\n", sep=""), conn)
+	base::writeLines(base::paste("$$\\resizebox{\\textwidth}{!}{$R_\\text{emp}(f) + \\sqrt{\\frac{4}{n} \\left\\{ \\log{\\left(2 ", shattering_lower, "\\right)} - \\log{\\delta} \\right\\}}$}$$\n", sep=""), conn)
 	base::writeLines(base::paste("$$\\leq R(f) \\leq$$\n", sep=""), conn)
-	base::writeLines(base::paste("$$R_\\text{emp}(f) + \\sqrt{\\frac{4}{n} \\left\\{ \\log{\\left(2 ", shattering_upper, "\\right)} - \\log{\\delta} \\right\\}},$$\n", sep=""), conn)
+	base::writeLines(base::paste("$$\\resizebox{\\textwidth}{!}{$R_\\text{emp}(f) + \\sqrt{\\frac{4}{n} \\left\\{ \\log{\\left(2 ", shattering_upper, "\\right)} - \\log{\\delta} \\right\\}}$},$$\n", sep=""), conn)
 	base::writeLines(base::paste("Having:\n", sep=""), conn)
 	base::writeLines(base::paste("$$\\Omega = \\alpha h(n)^\\frac{2}{", ncol(X)+1, "} \\log \\log{h(n)} / \\log{h(n)}$$\n", sep=""), conn)
-	base::writeLines(base::paste("$$O = \\beta (", h_n, ")^\\frac{2}{", ncol(X)+1, "}.$$\n", sep=""), conn)
+	base::writeLines(base::paste("$$O = \\beta h(n)^\\frac{2}{", ncol(X)+1, "}.$$\n", sep=""), conn)
 
 	## PAGE 7
 	# Newton(Sqrt(4/n*(Ln(2*n^2-2)-Ln(0.05)))-0.1,n,100,0.1);
