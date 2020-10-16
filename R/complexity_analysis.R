@@ -26,6 +26,9 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 				directory=tempdir(), file="myreport", length=5, 
 				quantile.percentage=0.5, epsilon=1e-7) {
 
+	### FIXME: We could resample t times for each sample size when computing the Shattering coefficient
+	### FIXME: We could paralelize this function
+	### FIXME: We could save the tex messages into a text file
 	oldpar <- graphics::par(no.readonly = TRUE)
 	on.exit(graphics::par(oldpar))
 
@@ -81,7 +84,7 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	base::writeLines(base::paste("\\end{itemize}\n", sep=""), conn)
 
 	grDevices::jpeg(filename = base::paste(directory, "/dataset.jpg", sep=""), width = 480, height = 480, units = "px", pointsize = 12, quality = 100, bg = "white")
-	base::plot(X, col=Y, main="Original dataset")
+	graphics::plot(X, col=Y, main="Original dataset")
 	grDevices::dev.off()
 	base::writeLines(base::paste("![Original dataset](", directory, "/dataset.jpg){width=75%}\n", sep=""), conn)
 
@@ -98,7 +101,7 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 
 
 	grDevices::jpeg(filename = base::paste(directory, "/hyperplanes.jpg", sep=""), width = 480, height = 480, units = "px", pointsize = 12, quality = 100, bg = "white")
-	base::plot(Hyperplanes$estimation[,1:2], main="Number of Homogeneous Regions (y axis)\nversus the Original dataset size (x axis)", xlab="Sample size", ylab="Reduced sample size", t="l")
+	graphics::plot(Hyperplanes$estimation[,1:2], main="Number of Homogeneous Regions (y axis)\nversus the Original dataset size (x axis)", xlab="Sample size", ylab="Reduced sample size", t="l")
 	regression.function = Hyperplanes$estimation[,1:2]
 	regression.function[,2] = as.numeric(ret$number.hyperplanes$regression$coefficients[2])*regression.function[,1]+as.numeric(ret$number.hyperplanes$regression$coefficients[1])
 	graphics::lines(regression.function, col=2)
@@ -211,7 +214,7 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	#}
 	#
 	#grDevices::jpeg(filename = base::paste(directory, "/shattering.jpg", sep=""), width = 480, height = 480, units = "px", pointsize = 12, quality = 100, bg = "white")
-	#base::plot(cbind(shattering.estimation[,"n"], shattering.estimation[,"upper.bound"]), main="Shattering along the original dataset size\n (lower bound in black and upper bound in red)", xlab="Sample size", ylab="Estimated Shattering value", t="l", col=2)
+	#graphics::plot(cbind(shattering.estimation[,"n"], shattering.estimation[,"upper.bound"]), main="Shattering along the original dataset size\n (lower bound in black and upper bound in red)", xlab="Sample size", ylab="Estimated Shattering value", t="l", col=2)
 	#graphics::lines(cbind(shattering.estimation[,"n"], shattering.estimation[,"lower.bound"]), col=1)
 	#grDevices::dev.off()
 	#base::writeLines(base::paste("![Shattering evaluated along the sample size](", directory, "/shattering.jpg){width=40%}\n", sep=""), conn)
