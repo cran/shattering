@@ -1,6 +1,6 @@
-076d7547102ce195eedb6ba10c756cd6 *DESCRIPTION
+d469996bb0193d38fc300f24428b3b81 *DESCRIPTION
 44d5365babb33443ec92facad9abbb13 *NAMESPACE
-3380c243d3e570313938357f417a5fea *R/complexity_analysis.R
+66e61ff6ca25e768b0971744efec4105 *R/complexity_analysis.R
 a13d5c6ce12a676a4505fd6754cfa30e *R/compress_space.R
 4a41f3a29d8b226a28dea24562b3cfae *R/equivalence_relation.R
 4281a0b4e0b00f658076898f42879fef *R/estimate_number_hyperplanes.R

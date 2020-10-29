@@ -152,46 +152,58 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	# Defining the lower bound
 	###########################
 	func = base::paste("FactorialSimplify(", sep="")
+	ffunc = base::paste("FactorialSimplify(", sep="")
 	t = base::paste("", sep="")
+	ft = base::paste("", sep="")
 	lower = base::paste(lower_h_n, sep="")
+	flower = base::paste(full_lower_h_n, sep="")
 	for (i in 1:(length(unique(Y))-1)) {
 		# Sum terms
 		func = base::paste(func,"Sum(c",i,",1,", lower, ",", sep="")
+		ffunc = base::paste(ffunc,"Sum(c",i,",1,", flower, ",", sep="")
 
 		# Internal term
 		t = base::paste(t,"Bin(", lower, ", c",i,")", sep="")
+		ft = base::paste(ft,"Bin(", flower, ", c",i,")", sep="")
 		if (i < length(unique(Y))-1) {
 			t = base::paste(t," * ", sep="")
+			ft = base::paste(ft," * ", sep="")
 		}
 	
-		#lower = base::paste(lower, "-c", i, sep="")
 		lower = base::paste(lower_h_n, "-Sum(i,c1,c", i, ",i)", sep="")
+		flower = base::paste(full_lower_h_n, "-Sum(i,c1,c", i, ",i)", sep="")
 	}
 	func = base::paste(func, t, pracma::strcat(rep(")", length(unique(Y)))), sep="")
-	#ryacas_shattering_lower = func
+	shattering_lower_func = base::paste(ffunc, ft, pracma::strcat(rep(")", length(unique(Y)))), sep="")
 	shattering_lower = Ryacas::tex(Ryacas::yac_symbol(func))
 
 	###########################
 	# Defining the upper bound
 	###########################
 	func = base::paste("FactorialSimplify(", sep="")
+	ffunc = base::paste("FactorialSimplify(", sep="")
 	t = base::paste("", sep="")
+	ft = base::paste("", sep="")
 	upper = base::paste(upper_h_n, sep="")
+	fupper = base::paste(full_upper_h_n, sep="")
 	for (i in 1:(length(unique(Y))-1)) {
 		# Sum terms
 		func = base::paste(func,"Sum(c",i,",1,", upper, ",", sep="")
+		ffunc = base::paste(ffunc,"Sum(c",i,",1,", fupper, ",", sep="")
 
 		# Internal term
 		t = base::paste(t,"Bin(", upper, ", c",i,")", sep="")
+		ft = base::paste(ft,"Bin(", fupper, ", c",i,")", sep="")
 		if (i < length(unique(Y))-1) {
 			t = base::paste(t," * ", sep="")
+			ft = base::paste(ft," * ", sep="")
 		}
 	
-		#upper = base::paste(upper, "-c", i, sep="")
 		upper = base::paste(upper_h_n, "-Sum(i,c1,c", i, ",i)", sep="")
+		fupper = base::paste(full_upper_h_n, "-Sum(i,c1,c", i, ",i)", sep="")
 	}
 	func = base::paste(func, t, pracma::strcat(rep(")", length(unique(Y)))), sep="")
-	#ryacas_shattering_upper = func
+	shattering_upper_func = base::paste(ffunc, ft, pracma::strcat(rep(")", length(unique(Y)))), sep="")
 	shattering_upper = Ryacas::tex(Ryacas::yac_symbol(func))
 
 	## PAGE 5
@@ -202,23 +214,6 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	base::writeLines(base::paste("While the upper bound for the Shattering coefficient function is:\n", sep=""), conn)
 	base::writeLines(base::paste("$$\\resizebox{\\textwidth}{!}{$", shattering_upper, "$}.$$\n", sep=""), conn)
 	base::writeLines(base::paste("Having $n > 0$, and $O$ and $\\Omega$ as previously defined.\n", sep=""), conn)
-
-	#shattering.estimation = NULL
-	#for (n in c(2:3)) {
-	#	Ryacas::yac(Ryacas::yac_symbol(base::paste("n:=", n, sep="")))
-	#	Ryacas::yac(Ryacas::yac_symbol(base::paste("O:=", full_upper_h_n, sep="")))
-	#	Ryacas::yac(Ryacas::yac_symbol(base::paste("Omega:=", full_lower_h_n, sep="")))
-	#	lower.estimation = as.numeric(Ryacas::yac(Ryacas::yac_symbol(ryacas_shattering_lower)))
-	#	upper.estimation = as.numeric(Ryacas::yac(Ryacas::yac_symbol(ryacas_shattering_upper)))
-	#	shattering.estimation = rbind(shattering.estimation, c(n, lower.estimation, upper.estimation))
-	#}
-	#
-	#grDevices::jpeg(filename = base::paste(directory, "/shattering.jpg", sep=""), width = 480, height = 480, units = "px", pointsize = 12, quality = 100, bg = "white")
-	#graphics::plot(cbind(shattering.estimation[,"n"], shattering.estimation[,"upper.bound"]), main="Shattering along the original dataset size\n (lower bound in black and upper bound in red)", xlab="Sample size", ylab="Estimated Shattering value", t="l", col=2)
-	#graphics::lines(cbind(shattering.estimation[,"n"], shattering.estimation[,"lower.bound"]), col=1)
-	#grDevices::dev.off()
-	#base::writeLines(base::paste("![Shattering evaluated along the sample size](", directory, "/shattering.jpg){width=40%}\n", sep=""), conn)
-	#base::writeLines(base::paste("This chart is just an illustration of both lower and upper Shattering coefficient functions.\n", sep=""), conn)
 
 	## PAGE 6
 	base::writeLines(base::paste("\\newpage ## Generalization bound\n", sep=""), conn)
@@ -233,49 +228,62 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	base::writeLines(base::paste("$$\\Omega = \\alpha h(n)^\\frac{2}{", ncol(X)+1, "} \\log \\log{h(n)} / \\log{h(n)}$$\n", sep=""), conn)
 	base::writeLines(base::paste("$$O = \\beta h(n)^\\frac{2}{", ncol(X)+1, "}.$$\n", sep=""), conn)
 
-	## PAGE 7
-	# Newton(Sqrt(4/n*(Ln(2*n^2-2)-Ln(0.05)))-0.1,n,100,0.1);
-	base::writeLines(base::paste("\\newpage ## Some practical results\n", sep=""), conn)
-	base::writeLines(base::paste("This is an analysis that considers you set up the number of hyperplanes for your learning algorithm using the lower and upper bounds as proposed in [\\textcolor{blue}{our paper}](https://arxiv.org/pdf/1911.05461.pdf):\n"), conn)
-	base::writeLines(base::paste("$$\\Omega(n^\\frac{2}{d+1} \\log \\log{n} / \\log{n}) = \\alpha (", h_n, ")^\\frac{2}{", ncol(X)+1, "} \\log \\log{(", h_n, ")} / \\log{(", h_n, ")}.$$\n", sep=""), conn)
-	base::writeLines(base::paste("$$O(d n^\\frac{2}{d+1}) = \\beta (", h_n, ")^\\frac{2}{", ncol(X)+1, "},$$\n", sep=""), conn)
-	base::writeLines(base::paste("for constants $\\alpha, \\beta > 0$.\n", sep=""), conn)
-       	base::writeLines(base::paste("The training sample sizes necessary to ensure the probability bound $\\delta$:\n", sep=""), conn)
-	base::writeLines(base::paste("$$P(\\sup_{f \\in \\mathcal{F}} |R_\\text{emp}(f)-R(f)| > \\epsilon) \\leq \\delta$$\n", sep=""), conn)
-       	base::writeLines(base::paste("are illustrated in the following table:\n", sep=""), conn)
-	# Creating the table
-	base::writeLines(base::paste("\\begin{table}[h!] \\centering \\begin{tabular}{|c|c|c|}\n", sep=""), conn)
-	base::writeLines(base::paste("\\hline \\textbf{Parameters} & \\textbf{Lower} & \\textbf{Upper} \\\\ \\hline\\hline\n", sep=""), conn)
-	for (epsilon in c(0.01, 0.05, 0.1)) {
-		for (delta in c(0.01, 0.05, 0.1)) {
-			minimal = as.character(ceiling(as.numeric(Ryacas::tex(Ryacas::yac_symbol(base::paste("Newton(Sqrt(4/n*(Ln(2*(", full_lower_h_n, "))-Ln(", delta, ")))-", epsilon, ",n,100,0.1);", sep=""))))))
-			maximal = as.character(ceiling(as.numeric(Ryacas::tex(Ryacas::yac_symbol(base::paste("Newton(Sqrt(4/n*(Ln(2*(", full_upper_h_n, "))-Ln(", delta, ")))-", epsilon, ",n,100,0.1);", sep=""))))))
-			base::writeLines(base::paste("$\\delta=", delta, ", \\epsilon=", epsilon, "$ & $", minimal,"$ & $", maximal, "$ \\\\ \n", sep=""), conn)
-		}
-	}
-	base::writeLines(base::paste("\\hline\\end{tabular}\\end{table}\n", sep=""), conn)
-	base::writeLines(base::paste("Remember:\n", sep=""), conn)
-	base::writeLines(base::paste("\\begin{itemize}\n", sep=""), conn)
-	base::writeLines(base::paste("\\item term $\\epsilon$ corresponds to the acceptable divergence between the empirical (sample error) and the (expected) risk for the Joint Probability Distribution $P(X,Y)$;\n", sep=""), conn)
-	base::writeLines(base::paste("\\item term $\\delta$ corresponds to the acceptable probability to ensure the uniform convergence to your classifier;\n", sep=""), conn)
-	base::writeLines(base::paste("\\item column ``Lower'' corresponds to the training sample size to ensure the lower bound of the Shattering coefficient function;\n", sep=""), conn)
-	base::writeLines(base::paste("\\item column ``Upper'' corresponds to the training sample size to ensure the upper bound of the Shattering coefficient function.\n", sep=""), conn)
-	base::writeLines(base::paste("\\end{itemize}\n", sep=""), conn)
-
-	## PAGE 8
-	# my.delta=0.05, my.epsilon=0.05
-	base::writeLines(base::paste("\\newpage ## Practical suggestions for your learning scenario\n", sep=""), conn)
-	base::writeLines(base::paste("According to your parametrization, you will:\n"), conn)
-	base::writeLines(base::paste("\\begin{itemize}\n", sep=""), conn)
-	base::writeLines(base::paste("\\item use $", my.epsilon*100, "$\\% (my.epsilon=$", my.epsilon, "$) to set up the acceptable divergence in between the empirical (in sample) and expected risks while classifying unseen examples;\n", sep=""), conn)
-	base::writeLines(base::paste("\\item use $", my.delta*100, "$\\% (my.delta=$", my.delta, "$) to set up the acceptable missing ratio of the uniform convergence of the empirical risk (in sample) to the expected risk. Its complement, i.e., $", 100-(my.delta*100), "$\\% defines the confidence level you will have in practical scenarios;\n", sep=""), conn)
-	base::writeLines(base::paste("\\end{itemize}\n", sep=""), conn)
-	my.t_h_n = base::paste("(", t_h_n, ")", sep="")
-	my.full_lower_h_n = base::paste("2^(1 * (", ncol(X), "*", my.t_h_n, ")^(2/(", ncol(X)+1, ")) * Ln(Ln(", my.t_h_n, ")) / Ln(", my.t_h_n,"))", sep="")
-	my.full_upper_h_n = base::paste("2^(1 * (", ncol(X), "*", my.t_h_n, ")^(2/(", ncol(X)+1, ")))", sep="") 
-	sample.minimal = as.character(ceiling(as.numeric(Ryacas::tex(Ryacas::yac_symbol(base::paste("Newton(Sqrt(4/n*(Ln(2*(", my.full_lower_h_n, "))-Ln(", my.delta, ")))-", my.epsilon, ",n,100,0.1);", sep=""))))))
-	sample.maximal = as.character(ceiling(as.numeric(Ryacas::tex(Ryacas::yac_symbol(base::paste("Newton(Sqrt(4/n*(Ln(2*(", my.full_upper_h_n, "))-Ln(", my.delta, ")))-", my.epsilon, ",n,100,0.1);", sep=""))))))
-	base::writeLines(base::paste("Given this setting, the lower and upper Shattering coefficient functions define $", sample.minimal, "$ as the minimal and $", sample.maximal, "$ as the maximal required training sample sizes to ensure learning guarantees according to [\\textcolor{blue}{the empirical risk minimization principle}](https://www.springer.com/gp/book/9783319949888) and respecting the separability of all homogeneous-class space regions according to the theoretical results by [\\textcolor{blue}{Har-Peled and Jones}](https://arxiv.org/abs/1706.02004).\n", sep=""), conn)
+#	## PAGE 7
+#	# Newton(Sqrt(4/n*(Ln(2*n^2-2)-Ln(0.05)))-0.1,n,100,0.1);
+#	base::writeLines(base::paste("\\newpage ## Some practical results\n", sep=""), conn)
+#	base::writeLines(base::paste("This is an analysis that considers you set up the number of hyperplanes for your learning algorithm using the lower and upper bounds as proposed in [\\textcolor{blue}{our paper}](https://arxiv.org/pdf/1911.05461.pdf):\n"), conn)
+#	base::writeLines(base::paste("$$\\Omega(n^\\frac{2}{d+1} \\log \\log{n} / \\log{n}) = \\alpha (", h_n, ")^\\frac{2}{", ncol(X)+1, "} \\log \\log{(", h_n, ")} / \\log{(", h_n, ")}.$$\n", sep=""), conn)
+#	base::writeLines(base::paste("$$O(d n^\\frac{2}{d+1}) = \\beta (", h_n, ")^\\frac{2}{", ncol(X)+1, "},$$\n", sep=""), conn)
+#	base::writeLines(base::paste("for constants $\\alpha, \\beta > 0$.\n", sep=""), conn)
+#       	base::writeLines(base::paste("The training sample sizes necessary to ensure the probability bound $\\delta$:\n", sep=""), conn)
+#	base::writeLines(base::paste("$$P(\\sup_{f \\in \\mathcal{F}} |R_\\text{emp}(f)-R(f)| > \\epsilon) \\leq \\delta$$\n", sep=""), conn)
+#       	base::writeLines(base::paste("are illustrated in the following table:\n", sep=""), conn)
+#	# Creating the table
+#	base::writeLines(base::paste("\\begin{table}[h!] \\centering \\begin{tabular}{|c|c|c|}\n", sep=""), conn)
+#	base::writeLines(base::paste("\\hline \\textbf{Parameters} & \\textbf{Lower} & \\textbf{Upper} \\\\ \\hline\\hline\n", sep=""), conn)
+#
+#	slf = Ryacas::yac_symbol(shattering_lower_func)
+#	suf = Ryacas::yac_symbol(shattering_upper_func)
+#	for (epsilon in c(0.01, 0.05, 0.1)) {
+#		for (delta in c(0.01, 0.05, 0.1)) {
+#			cat("oi\n")
+#			print(base::paste("Newton(Sqrt(4/n*(Ln(2*(", slf, "))-Ln(", delta, ")))-", epsilon, ",n,100,0.1);", sep=""))
+#			minimal = as.character(ceiling(as.numeric(Ryacas::tex(Ryacas::yac_symbol(base::paste("Newton(Sqrt(4/n*(Ln(2*(", slf, "))-Ln(", delta, ")))-", epsilon, ",n,100,0.1);", sep=""))))))
+#			maximal = as.character(ceiling(as.numeric(Ryacas::tex(Ryacas::yac_symbol(base::paste("Newton(Sqrt(4/n*(Ln(2*(", suf, "))-Ln(", delta, ")))-", epsilon, ",n,100,0.1);", sep=""))))))
+#			base::writeLines(base::paste("$\\delta=", delta, ", \\epsilon=", epsilon, "$ & $", minimal,"$ & $", maximal, "$ \\\\ \n", sep=""), conn)
+#		}
+#	}
+#	base::writeLines(base::paste("\\hline\\end{tabular}\\end{table}\n", sep=""), conn)
+#	base::writeLines(base::paste("Remember:\n", sep=""), conn)
+#	base::writeLines(base::paste("\\begin{itemize}\n", sep=""), conn)
+#	base::writeLines(base::paste("\\item term $\\epsilon$ corresponds to the acceptable divergence between the empirical (sample error) and the (expected) risk for the Joint Probability Distribution $P(X,Y)$;\n", sep=""), conn)
+#	base::writeLines(base::paste("\\item term $\\delta$ corresponds to the acceptable probability to ensure the uniform convergence to your classifier;\n", sep=""), conn)
+#	base::writeLines(base::paste("\\item column ``Lower'' corresponds to the training sample size to ensure the lower bound of the Shattering coefficient function;\n", sep=""), conn)
+#	base::writeLines(base::paste("\\item column ``Upper'' corresponds to the training sample size to ensure the upper bound of the Shattering coefficient function.\n", sep=""), conn)
+#	base::writeLines(base::paste("\\end{itemize}\n", sep=""), conn)
+#
+#
+#	## PAGE 8
+#	# Lower bound
+#
+#	## FIXME: Eu devo recalcular aqui o tamanho de amostra para o número de hiperplanos escolhido pelo usuário
+#
+#	# my.delta=0.05, my.epsilon=0.05
+#	base::writeLines(base::paste("\\newpage ## Your learning scenario\n", sep=""), conn)
+#	base::writeLines(base::paste("As you defined ", number.hyperplanes, " hyperplanes, your shattering coefficient function is:\n"), conn)
+#	base::writeLines(base::paste("$$\\resizebox{\\textwidth}{!}{$", user_lower_shattering, "$}$$\n", sep=""), conn)
+#	base::writeLines("$$\\leq \\mathcal{N}(\\mathcal{F},2n) \\leq$$\n", conn)
+#	base::writeLines(base::paste("$$\\resizebox{\\textwidth}{!}{$", user_upper_shattering, ".$}$$\n", sep=""), conn)
+#	base::writeLines(base::paste("This particular number of hyperplanes under the following parametrization:\n"), conn)
+#	base::writeLines(base::paste("\\begin{itemize}\n", sep=""), conn)
+#	base::writeLines(base::paste("\\item use $", my.epsilon*100, "$\\% (my.epsilon=$", my.epsilon, "$) to set up the acceptable divergence in between the empirical (in sample) and expected risks while classifying unseen examples;\n", sep=""), conn)
+#	base::writeLines(base::paste("\\item use $", my.delta*100, "$\\% (my.delta=$", my.delta, "$) to set up the acceptable missing ratio of the uniform convergence of the empirical risk (in sample) to the expected risk. Its complement, i.e., $", 100-(my.delta*100), "$\\% defines the confidence level you will have in practical scenarios;\n", sep=""), conn)
+#	base::writeLines(base::paste("\\end{itemize}\n", sep=""), conn)
+#	# Defining Omega
+#	sample.minimal = as.character(ceiling(as.numeric(Ryacas::tex(Ryacas::yac_symbol(base::paste("Newton(Sqrt(4/n*(Ln(2*(", user_lower_shattering_func, "))-Ln(", my.delta, ")))-", my.epsilon, ",n,100,0.1);", sep=""))))))
+#	# Defining O
+#	sample.maximal = as.character(ceiling(as.numeric(Ryacas::tex(Ryacas::yac_symbol(base::paste("Newton(Sqrt(4/n*(Ln(2*(", user_upper_shattering_func, "))-Ln(", my.delta, ")))-", my.epsilon, ",n,100,0.1);", sep=""))))))
+#	base::writeLines(base::paste("Given this setting, the lower and upper Shattering coefficient functions define $", sample.minimal, "$ as the minimal and $", sample.maximal, "$ as the maximal required training sample sizes to ensure learning guarantees according to [\\textcolor{blue}{the empirical risk minimization principle}](https://www.springer.com/gp/book/9783319949888) and respecting the separability of all homogeneous-class space regions according to the theoretical results by [\\textcolor{blue}{Har-Peled and Jones}](https://arxiv.org/abs/1706.02004).\n", sep=""), conn)
 
 	base::close(conn)
 
