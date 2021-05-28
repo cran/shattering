@@ -11,7 +11,7 @@ complexity_analysis(
   my.epsilon = 0.05,
   directory = tempdir(),
   file = "myreport",
-  length = 5,
+  length = 10,
   quantile.percentage = 0.5,
   epsilon = 1e-07
 )

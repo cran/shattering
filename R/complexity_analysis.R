@@ -23,7 +23,7 @@
 #' # complexity_analysis(X=as.matrix(iris[,1:4]), Y=as.numeric(iris[,5]))
 #' @export
 complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05, 
-				directory=tempdir(), file="myreport", length=5, 
+				directory=tempdir(), file="myreport", length=10, 
 				quantile.percentage=0.5, epsilon=1e-7) {
 
 	### FIXME: We could resample t times for each sample size when computing the Shattering coefficient
@@ -284,6 +284,132 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 #	# Defining O
 #	sample.maximal = as.character(ceiling(as.numeric(Ryacas::tex(Ryacas::yac_symbol(base::paste("Newton(Sqrt(4/n*(Ln(2*(", user_upper_shattering_func, "))-Ln(", my.delta, ")))-", my.epsilon, ",n,100,0.1);", sep=""))))))
 #	base::writeLines(base::paste("Given this setting, the lower and upper Shattering coefficient functions define $", sample.minimal, "$ as the minimal and $", sample.maximal, "$ as the maximal required training sample sizes to ensure learning guarantees according to [\\textcolor{blue}{the empirical risk minimization principle}](https://www.springer.com/gp/book/9783319949888) and respecting the separability of all homogeneous-class space regions according to the theoretical results by [\\textcolor{blue}{Har-Peled and Jones}](https://arxiv.org/abs/1706.02004).\n", sep=""), conn)
+
+	## PAGE 9
+	base::writeLines("\\newpage ## R Code to generate the lower-bound Shattering coeffient function\n", conn)
+	base::writeLines("The following R code employs all previous formulation to numerically estimate the lower bound for the Shattering coefficient function, given the exact computation is time intensive and leads to infinite values.\n", conn)
+	base::writeLines(base::paste("\\begin{verbatim}\n", sep=""), conn)
+	eqn = base::paste("h_n <- function(n) { return (", sprintf("%.5f", as.numeric(ret$number.hyperplanes$regression$coefficients[2])), " * n ", sep="")
+	if (sign(as.numeric(ret$number.hyperplanes$regression$coefficients[1])) >= 0) {
+		eqn = base::paste(eqn, "+", sep="")
+	} else {
+		eqn = base::paste(eqn, "-", sep="")
+	}
+	eqn = base::paste(eqn, sprintf("%.5f", abs(as.numeric(ret$number.hyperplanes$regression$coefficients[1]))), ") }\n", sep="")
+	base::writeLines(eqn, conn)
+	base::writeLines(base::paste("big_Omega_power <- function(alpha, n, power=", 2/(ncol(X)+1), ") {\n return (2^(alpha*h_n(n)^power * log(log(h_n(n)))/log(h_n(n))))\n }\n", sep=""), conn)
+
+	###########################
+	# Defining the lower bound
+	###########################
+	txt = base::paste("shattering_lower_bound <- function(alpha, n.start, n.end, n.by, power=", 2/(ncol(X)+1), ") {\n counter = 1\n shat = matrix(0, nrow=length(seq(n.start, n.end, by=n.by)), ncol=2)\n for (n in seq(n.start, n.end, by=n.by)) {\n  value = 1\n", sep="")
+	prod = ""
+	subtract = ""
+	spaces = pracma::strcat(rep(" ", length(unique(Y))+2))
+	end = ""
+	for (i in 1:(length(unique(Y))-1)) {
+		# Sum terms
+		txt = base::paste(txt, pracma::strcat(rep(" ", i+1)), "for (c",i," in 1:round(max(c(big_Omega_power(alpha, n, power)", subtract, ", 1)))) {", sep="")
+
+		# Internal term
+		prod = base::paste(prod, "choose(max(c(big_Omega_power(alpha, n)", sep="")
+		if (i > 1) {
+			prod = base::paste(prod, "-sum(c1:c", i, ")", sep="")
+		}
+		prod = base::paste(prod, ", c",i,")), c", i, ")", sep="")
+		if (i < length(unique(Y))-1) {
+			txt = base::paste(txt, "\n", sep="")
+			prod = base::paste(prod, "*\n", spaces, " ", sep="")
+		}
+
+		if (i == 1) {
+			subtract = base::paste("-sum(c1:c", i, ")", sep="")
+		} else {
+			subtract = base::paste("-sum(c1:c", i-2, ")", sep="")
+		}
+		end = base::paste(end, pracma::strcat(rep(" ", length(unique(Y))-i+1)), "}\n", sep="")
+	}
+	base::writeLines(txt, conn)
+	base::writeLines(base::paste(spaces, "value = value * ", prod, sep=""), conn)
+	base::writeLines(base::paste(end, sep=""), conn)
+	base::writeLines(base::paste("  shat[counter,] = c(n, value)", sep=""), conn)
+	base::writeLines(base::paste("  counter = counter + 1", sep=""), conn)
+	base::writeLines(base::paste(" }\n return (shat)\n}\n", sep=""), conn)
+
+	base::writeLines(base::paste("model.shattering_lower_bound <- function(alpha=1, n.start=", nrow(X), ",\n\t\tn.end=", nrow(X)+100, ", n.by=1, plot=TRUE) {", sep=""), conn)
+	base::writeLines(base::paste(" dataset = as.data.frame(shattering_lower_bound(alpha, n.start, n.end, n.by))", sep=""), conn)
+	base::writeLines(base::paste(" if (plot) { plot(dataset) }", sep=""), conn)
+	base::writeLines(base::paste(" model = lm(log(V2) ~ V1, data=dataset)", sep=""), conn)
+	base::writeLines(base::paste(" eqn = paste(\"Shat_low(n)=exp(\", as.numeric(model$coefficients[2]),\"*n + \",\n\t\t\tas.numeric(model$coefficients[1]), \")\", sep=\"\")", sep=""), conn)
+	base::writeLines(base::paste(" ret = list()", sep=""), conn)
+	base::writeLines(base::paste(" ret$model = model", sep=""), conn)
+	base::writeLines(base::paste(" ret$eqn = eqn", sep=""), conn)
+	base::writeLines(base::paste(" return (ret)", sep=""), conn)
+	base::writeLines(base::paste("}", sep=""), conn)
+	base::writeLines(base::paste("\\end{verbatim}\n", sep=""), conn)
+
+	## PAGE 10
+	base::writeLines("\\newpage ## R Code to generate the upper-bound Shattering coeffient function\n", conn)
+	base::writeLines("The following R code employs all previous formulation to numerically estimate the upper bound for the Shattering coefficient function, given the exact computation is time intensive and leads to infinite values.\n", conn)
+	base::writeLines(base::paste("\\begin{verbatim}\n", sep=""), conn)
+	eqn = base::paste("h_n <- function(n) { return (", sprintf("%.5f", as.numeric(ret$number.hyperplanes$regression$coefficients[2])), " * n ", sep="")
+	if (sign(as.numeric(ret$number.hyperplanes$regression$coefficients[1])) >= 0) {
+		eqn = base::paste(eqn, "+", sep="")
+	} else {
+		eqn = base::paste(eqn, "-", sep="")
+	}
+	eqn = base::paste(eqn, sprintf("%.5f", abs(as.numeric(ret$number.hyperplanes$regression$coefficients[1]))), ") }\n", sep="")
+	base::writeLines(eqn, conn)
+	base::writeLines(base::paste("big_O_power <- function(beta, n, power=", 2/(ncol(X)+1), ") {\n return (2^(beta*h_n(n)^power))\n }\n", sep=""), conn)
+
+	###########################
+	# Defining the upper bound
+	###########################
+	txt = base::paste("shattering_upper_bound <- function(beta, n.start, n.end, n.by, power=", 2/(ncol(X)+1), ") {\n counter = 1\n shat = matrix(0, nrow=length(seq(n.start, n.end, by=n.by)), ncol=2)\n for (n in seq(n.start, n.end, by=n.by)) {\n  value = 1\n", sep="")
+	prod = ""
+	subtract = ""
+	spaces = pracma::strcat(rep(" ", length(unique(Y))+2))
+	end = ""
+	for (i in 1:(length(unique(Y))-1)) {
+		# Sum terms
+		txt = base::paste(txt, pracma::strcat(rep(" ", i+1)), "for (c",i," in 1:round(max(c(big_O_power(beta, n, power)", subtract, ", 1)))) {", sep="")
+
+		# Internal term
+		prod = base::paste(prod, "choose(max(c(big_O_power(beta, n)", sep="")
+		if (i > 1) {
+			prod = base::paste(prod, "-sum(c1:c", i, ")", sep="")
+		}
+		prod = base::paste(prod, ", c",i,")), c", i, ")", sep="")
+		if (i < length(unique(Y))-1) {
+			txt = base::paste(txt, "\n", sep="")
+			prod = base::paste(prod, "*\n", spaces, " ", sep="")
+		}
+
+		if (i == 1) {
+			subtract = base::paste("-sum(c1:c", i, ")", sep="")
+		} else {
+			subtract = base::paste("-sum(c1:c", i-2, ")", sep="")
+		}
+		end = base::paste(end, pracma::strcat(rep(" ", length(unique(Y))-i+1)), "}\n", sep="")
+	}
+	base::writeLines(txt, conn)
+	base::writeLines(base::paste(spaces, "value = value * ", prod, sep=""), conn)
+	base::writeLines(base::paste(end, sep=""), conn)
+	base::writeLines(base::paste("  shat[counter,] = c(n, value)", sep=""), conn)
+	base::writeLines(base::paste("  counter = counter + 1", sep=""), conn)
+	base::writeLines(base::paste(" }\n return (shat)\n}\n", sep=""), conn)
+
+	base::writeLines(base::paste("model.shattering_upper_bound <- function(beta=1, n.start=", nrow(X), ",\n\t\tn.end=", nrow(X)+100, ", n.by=1, plot=TRUE) {", sep=""), conn)
+	base::writeLines(base::paste(" dataset = as.data.frame(shattering_upper_bound(beta, n.start, n.end, n.by))", sep=""), conn)
+	base::writeLines(base::paste(" if (plot) { plot(dataset) }", sep=""), conn)
+	base::writeLines(base::paste(" model = lm(log(V2) ~ V1, data=dataset)", sep=""), conn)
+	base::writeLines(base::paste(" eqn = paste(\"Shat_upper(n)=exp(\", as.numeric(model$coefficients[2]),\"*n + \",\n\t\t\tas.numeric(model$coefficients[1]), \")\", sep=\"\")", sep=""), conn)
+	base::writeLines(base::paste(" ret = list()", sep=""), conn)
+	base::writeLines(base::paste(" ret$model = model", sep=""), conn)
+	base::writeLines(base::paste(" ret$eqn = eqn", sep=""), conn)
+	base::writeLines(base::paste(" return (ret)", sep=""), conn)
+	base::writeLines(base::paste("}", sep=""), conn)
+	base::writeLines(base::paste("\\end{verbatim}\n", sep=""), conn)
 
 	base::close(conn)
 

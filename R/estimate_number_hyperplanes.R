@@ -56,7 +56,7 @@ estimate_number_hyperplanes <- function(X, Y, length=20, quantile.percentage=0.0
 		M = equivalence_relation(X[1:i,], Y[1:i], quantile.percentage, epsilon)
 
 		# Compressing the input space
-		C = compress_space(M, Y[1:i])
+		C = compress_space(M$relations, Y[1:i])
 
 		# Computing the Big Omega and Big O bounds for the number of hyperplanes
 		# according to the theoretical results by Har-Peled and Jones

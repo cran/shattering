@@ -9,7 +9,7 @@
 #' @return A list with the equivalence relations in form of a list
 #' @keywords equivalence relation
 #' @export
-equivalence_relation <- function(X, Y, quantile.percentage=1, epsilon=1e-7, chunk=250) {
+equivalence_relation <- function(X, Y, quantile.percentage=1, epsilon=1e-3, chunk=250) {
 
 	radius = rep(0, nrow(X))
 	for (c in unique(Y)) {
@@ -30,14 +30,19 @@ equivalence_relation <- function(X, Y, quantile.percentage=1, epsilon=1e-7, chun
 
 	R = list()
 	for (c in unique(Y)) {
+		# which elements in Y are equal to c?
 		ids = which(c == Y)
+		# for every element in ids
 		for (sub in seq(1, length(ids), by=chunk)) {
+			# selecting a subchunk
 			elements = sub:(sub+chunk-1)
 			if (sub+chunk-1 > length(ids)) {
 				elements = sub:length(ids)
 			}
+			# computing distances
 			all.dists = matrix(as.numeric(pdist::pdist(X, indices.A=ids[elements], 
 								   indices.B=1:nrow(X))@dist), byrow=T, ncol=nrow(X))
+			# for every row in the distance matrix
 			for (i in 1:nrow(all.dists)) {
 				pos = which(all.dists[i,] < radius[ids[elements[i]]]) 
 				R[[ ids[elements[i]] ]] = slam::simple_sparse_array(i=pos, v=rep(1, length(pos)), dim=nrow(X))
@@ -45,5 +50,16 @@ equivalence_relation <- function(X, Y, quantile.percentage=1, epsilon=1e-7, chun
 		}
 	}
 
-	return (R)
+	#for (i in 1:length(R)) {
+	#	plot(X, col=Y+2, cex=3, t="p", pch=20)
+	#	points(matrix(X[as.vector(R[[i]]$i),], nrow=length(R[[i]]$i)), col=2, cex=2, pch=20)
+	#	locator(1)
+	#}
+
+	ret = list()
+	ret$X = X
+	ret$Y = Y
+	ret$relations = R
+
+	return (ret)
 }

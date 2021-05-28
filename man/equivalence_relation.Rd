@@ -8,7 +8,7 @@ equivalence_relation(
   X,
   Y,
   quantile.percentage = 1,
-  epsilon = 1e-07,
+  epsilon = 0.001,
   chunk = 250
 )
 }
