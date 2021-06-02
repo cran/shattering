@@ -74,7 +74,7 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	base::writeLines("# Package Shattering\n", conn)
 	base::writeLines("This document reports an analysis on the shattering coefficient for your supervised dataset. This is helpful in terms of understanding the complexity of your data, the number of hyperplanes required to perform the classification task, and the minimal training sample size to ensure proper learning bounds (i.e. to ensure your model will perform similarly on unseen examples).\n", conn)
 	base::writeLines("**Available at** [\\textcolor{blue}{https://cran.r-project.org/web/packages/shattering}](https://cran.r-project.org/web/packages/shattering)\n", conn)
-	base::writeLines("**Maintained by** Rodrigo Fernandes de Mello <<mello@icmc.usp.br>>\n", conn)
+	base::writeLines("**Maintained by** Rodrigo Fernandes de Mello <<mellorf@gmail.com>>\n", conn)
 	base::writeLines("**Cite this report** [\\textcolor{blue}{https://arxiv.org/abs/1911.05461}](https://arxiv.org/abs/1911.05461)\n\n", conn)
 	base::writeLines("\\newpage ## Original dataset\n", conn)
 	base::writeLines(base::paste("This dataset contains ", nrow(X), " rows and ", ncol(X), " columns and it is here assessed using the following user-defined parameters:\n", sep=""), conn)
@@ -123,10 +123,7 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	base::writeLines(base::paste("$$O(d n^\\frac{2}{d+1}) = \\beta n^\\frac{2}{d+1} = \\beta h(n)^\\frac{2}{d+1}$$\n", sep=""), conn)
 	base::writeLines(base::paste("$$O(d n^\\frac{2}{d+1}) = \\beta (", h_n, ")^\\frac{2}{", ncol(X)+1, "},$$\n", sep=""), conn)
 	base::writeLines(base::paste("for constants $\\alpha, \\beta > 0$.\n", sep=""), conn)
-	base::writeLines(base::paste("**Observation:** If the maximal number of hyperplanes found after using $h(n)$ is used by your supervised learning algorithm, you will have a great probability of overfitting this dataset. Therefore, we always suggest you to set less hyperplanes in order to avoid shattering (or dividing) this sample in all possible ways according to its homogeneous-class regions. For instance, knowing this dataset has $", nrow(X), "$ examples, and given $h(n)$ for $n=", nrow(X), "$, we find:\n", sep=""), conn)
-	base::writeLines(base::paste("$$", sprintf("%.5f", as.numeric(ret$number.hyperplanes$regression$coefficients[2])), " \\times ", nrow(X), " + ", sprintf("%.5f", as.numeric(ret$number.hyperplanes$regression$coefficients[1])), " = ", 
-		    ceiling(ncol(X) * (as.numeric(ret$number.hyperplanes$regression$coefficients[2]) * nrow(X) + as.numeric(ret$number.hyperplanes$regression$coefficients[1]))^(2/(ncol(X)+1))), "$$", sep=""), conn)
-	base::writeLines(base::paste("as such maximal number of hyperplanes which we suggest to be avoided. Use at least one hyperplane less because that will bring some reduction in the chance of obtaining an exponential number of distinct classifications.\n", sep=""), conn)
+	base::writeLines(base::paste("**Observation:** If the maximal number of hyperplanes found after using $O(h(n)^\\frac{2}{d+1})$ is used by your supervised learning algorithm, you will have a great probability of overfitting this dataset. Therefore, we always suggest you to set less hyperplanes in order to avoid shattering (or dividing) this sample in all possible ways according to its homogeneous-class regions.\n", sep=""), conn)
 
 	## PAGE 4
 	base::writeLines("\\newpage ## Shattering coefficient estimation\n", conn)
@@ -141,18 +138,18 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	upper_h_n = base::paste("2^O", sep="")
 	base::writeLines("given each hyperplane divides the input space into two halves.\n", conn)
 	base::writeLines("As next step, we compute the Shattering coefficient function using the following inequality, proven in [\\textcolor{blue}{our paper}](https://arxiv.org/pdf/1911.05461.pdf):\n", conn)
-	base::writeLines("$$\\mathcal{N}(\\mathcal{F},2n) \\leq \\sum_{c_1=1}^{2^m} \\sum_{c_2=1}^{2^m-\\sum_{i=c_1}^{c_1}{i}} \\ldots \\sum_{c_{C-1}=1}^{2^m-\\sum_{i=c_1}^{c_{C-2}}{i}} \\binom{2^m}{c_1} \\times \\binom{2^m-\\sum_{i=c_1}^{c_1}{i}}{c_2}\\times \\ldots \\times \\binom{2^m-\\sum_{i=c_1}^{c_{C-2}}{i}}{c_{C-1}}$$\n", conn)
+	base::writeLines("$$\\mathcal{N}(\\mathcal{F},2n) \\leq 1 + \\sum_{c_1=1}^{2^m} \\sum_{c_2=1}^{2^m-c_1} \\ldots \\sum_{c_{C-1}=1}^{2^m-c_1-c_2\\ldots-c_{C-2}} \\binom{2^m}{c_1} \\times \\binom{2^m-c_1}{c_2}\\times \\ldots \\times \\binom{2^m-c_1-c_2\\ldots-c_{C-2}}{c_{C-1}}$$\n", conn)
 	base::writeLines("From that, we define the lower and upper bounds for the Shattering coefficient function as follows:\n", conn)
-	base::writeLines("$$\\sum_{c_1=1}^{2^{\\Omega}} \\sum_{c_2=1}^{2^{\\Omega}-\\sum_{i=c_1}^{c_1}{i}} \\ldots \\sum_{c_{C-1}=1}^{2^{\\Omega}-\\sum_{i=c_1}^{c_{C-2}}{i}} \\binom{2^{\\Omega}}{c_1} \\times \\binom{2^{\\Omega}-\\sum_{i=c_1}^{c_1}{i}}{c_2}\\times \\ldots \\times \\binom{2^{\\Omega}-\\sum_{i=c_1}^{c_{C-2}}{i}}{c_{C-1}}$$\n", conn)
+	base::writeLines("$$1+\\sum_{c_1=1}^{2^{\\Omega}} \\sum_{c_2=1}^{2^\\Omega-c_1} \\ldots \\sum_{c_{C-1}=1}^{2^\\Omega-c_1-c_2\\ldots-c_{C-2}} \\binom{2^{\\Omega}}{c_1} \\times \\binom{2^{\\Omega}-c_1}{c_2}\\times \\ldots \\times \\binom{2^{\\Omega}-c_1-c_2\\ldots-c_{C-2}}{c_{C-1}}$$\n", conn)
 	base::writeLines("$$\\leq \\mathcal{N}(\\mathcal{F},2n) \\leq$$\n", conn)
-	base::writeLines("$$\\sum_{c_1=1}^{2^{O}} \\sum_{c_2=1}^{2^{O}-\\sum_{i=c_1}^{c_1}{i}} \\ldots \\sum_{c_{C-1}=1}^{2^{O}-\\sum_{i=c_1}^{c_{C-2}}{i}} \\binom{2^{O}}{c_1} \\times \\binom{2^{O}-\\sum_{i=c_1}^{c_1}{i}}{c_2}\\times \\ldots \\times \\binom{2^{O}-\\sum_{i=c_1}^{c_{C-2}}{i}}{c_{C-1}},$$", conn)
+	base::writeLines("$$1+\\sum_{c_1=1}^{2^{O}} \\sum_{c_2=1}^{2^{O}-c_1} \\ldots \\sum_{c_{C-1}=1}^{2^{O}-c_1-c_2\\ldots-c_{C-2}} \\binom{2^{O}}{c_1} \\times \\binom{2^{O}-c_1}{c_2}\\times \\ldots \\times \\binom{2^{O}-c_1-c_2\\ldots-c_{C-2}}{c_{C-1}},$$", conn)
 	base::writeLines(base::paste("considering $C$ classes in our problem ($C=", length(unique(Y)), "$ for this dataset) and using $\\Omega$ and $O$ for short.\n", sep=""), conn)
 
 	###########################
 	# Defining the lower bound
 	###########################
-	func = base::paste("FactorialSimplify(", sep="")
-	ffunc = base::paste("FactorialSimplify(", sep="")
+	func = base::paste("FactorialSimplify(1+", sep="")
+	ffunc = base::paste("FactorialSimplify(1+", sep="")
 	t = base::paste("", sep="")
 	ft = base::paste("", sep="")
 	lower = base::paste(lower_h_n, sep="")
@@ -170,8 +167,10 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 			ft = base::paste(ft," * ", sep="")
 		}
 	
-		lower = base::paste(lower_h_n, "-Sum(i,c1,c", i, ",i)", sep="")
-		flower = base::paste(full_lower_h_n, "-Sum(i,c1,c", i, ",i)", sep="")
+		#lower = base::paste(lower_h_n, "-Sum(i,c1,c", i, ",i)", sep="")
+		#flower = base::paste(full_lower_h_n, "-Sum(i,c1,c", i, ",i)", sep="")
+		lower = base::paste(lower, "-c", i, sep="")
+		flower = base::paste(flower, "-c", i, sep="")
 	}
 	func = base::paste(func, t, pracma::strcat(rep(")", length(unique(Y)))), sep="")
 	shattering_lower_func = base::paste(ffunc, ft, pracma::strcat(rep(")", length(unique(Y)))), sep="")
@@ -180,8 +179,8 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	###########################
 	# Defining the upper bound
 	###########################
-	func = base::paste("FactorialSimplify(", sep="")
-	ffunc = base::paste("FactorialSimplify(", sep="")
+	func = base::paste("FactorialSimplify(1+", sep="")
+	ffunc = base::paste("FactorialSimplify(1+", sep="")
 	t = base::paste("", sep="")
 	ft = base::paste("", sep="")
 	upper = base::paste(upper_h_n, sep="")
@@ -199,8 +198,10 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 			ft = base::paste(ft," * ", sep="")
 		}
 	
-		upper = base::paste(upper_h_n, "-Sum(i,c1,c", i, ",i)", sep="")
-		fupper = base::paste(full_upper_h_n, "-Sum(i,c1,c", i, ",i)", sep="")
+		#upper = base::paste(upper_h_n, "-Sum(i,c1,c", i, ",i)", sep="")
+		#fupper = base::paste(full_upper_h_n, "-Sum(i,c1,c", i, ",i)", sep="")
+		upper = base::paste(upper, "-c", i, sep="")
+		fupper = base::paste(fupper, "-c", i, sep="")
 	}
 	func = base::paste(func, t, pracma::strcat(rep(")", length(unique(Y)))), sep="")
 	shattering_upper_func = base::paste(ffunc, ft, pracma::strcat(rep(")", length(unique(Y)))), sep="")
@@ -286,8 +287,8 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 #	base::writeLines(base::paste("Given this setting, the lower and upper Shattering coefficient functions define $", sample.minimal, "$ as the minimal and $", sample.maximal, "$ as the maximal required training sample sizes to ensure learning guarantees according to [\\textcolor{blue}{the empirical risk minimization principle}](https://www.springer.com/gp/book/9783319949888) and respecting the separability of all homogeneous-class space regions according to the theoretical results by [\\textcolor{blue}{Har-Peled and Jones}](https://arxiv.org/abs/1706.02004).\n", sep=""), conn)
 
 	## PAGE 9
-	base::writeLines("\\newpage ## R Code to generate the lower-bound Shattering coeffient function\n", conn)
-	base::writeLines("The following R code employs all previous formulation to numerically estimate the lower bound for the Shattering coefficient function, given the exact computation is time intensive and leads to infinite values.\n", conn)
+	base::writeLines("\\newpage ## R Code to generate the lower-bound Shattering coefficient function\n", conn)
+	base::writeLines("The following R code employs all previous formulation to numerically estimate the lower bound for the Shattering coefficient function, given the exact computation is time intensive and leads to infinite values. We suggest the user to run the following code trying to increase as much as possible the value of variable n.end in attempt to estimate the shattering function for the greatest as possible sample size.\n", conn)
 	base::writeLines(base::paste("\\begin{verbatim}\n", sep=""), conn)
 	eqn = base::paste("h_n <- function(n) { return (", sprintf("%.5f", as.numeric(ret$number.hyperplanes$regression$coefficients[2])), " * n ", sep="")
 	if (sign(as.numeric(ret$number.hyperplanes$regression$coefficients[1])) >= 0) {
@@ -313,26 +314,28 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 
 		# Internal term
 		prod = base::paste(prod, "choose(max(c(big_Omega_power(alpha, n)", sep="")
-		if (i > 1) {
-			prod = base::paste(prod, "-sum(c1:c", i, ")", sep="")
-		}
+		#if (i > 1) {
+		#prod = base::paste(prod, "-sum(c1:c", i, ")", sep="")
+		prod = base::paste(prod, subtract, sep="")
+		subtract = base::paste(subtract, "-c", i, sep="")
+		#}
 		prod = base::paste(prod, ", c",i,")), c", i, ")", sep="")
 		if (i < length(unique(Y))-1) {
 			txt = base::paste(txt, "\n", sep="")
 			prod = base::paste(prod, "*\n", spaces, " ", sep="")
 		}
 
-		if (i == 1) {
-			subtract = base::paste("-sum(c1:c", i, ")", sep="")
-		} else {
-			subtract = base::paste("-sum(c1:c", i-2, ")", sep="")
-		}
+		#if (i == 1) {
+		#	subtract = base::paste("-c", i, sep="")
+		#} else {
+		#	subtract = base::paste("-c", i-2, sep="")
+		#}
 		end = base::paste(end, pracma::strcat(rep(" ", length(unique(Y))-i+1)), "}\n", sep="")
 	}
 	base::writeLines(txt, conn)
 	base::writeLines(base::paste(spaces, "value = value * ", prod, sep=""), conn)
 	base::writeLines(base::paste(end, sep=""), conn)
-	base::writeLines(base::paste("  shat[counter,] = c(n, value)", sep=""), conn)
+	base::writeLines(base::paste("  shat[counter,] = c(n, value+1)", sep=""), conn)
 	base::writeLines(base::paste("  counter = counter + 1", sep=""), conn)
 	base::writeLines(base::paste(" }\n return (shat)\n}\n", sep=""), conn)
 
@@ -340,7 +343,7 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	base::writeLines(base::paste(" dataset = as.data.frame(shattering_lower_bound(alpha, n.start, n.end, n.by))", sep=""), conn)
 	base::writeLines(base::paste(" if (plot) { plot(dataset) }", sep=""), conn)
 	base::writeLines(base::paste(" model = lm(log(V2) ~ V1, data=dataset)", sep=""), conn)
-	base::writeLines(base::paste(" eqn = paste(\"Shat_low(n)=exp(\", as.numeric(model$coefficients[2]),\"*n + \",\n\t\t\tas.numeric(model$coefficients[1]), \")\", sep=\"\")", sep=""), conn)
+	base::writeLines(base::paste(" eqn = paste(\"exp(\", as.numeric(model$coefficients[2]),\"*n + \",\n\t\t\tas.numeric(model$coefficients[1]), \")\", sep=\"\")", sep=""), conn)
 	base::writeLines(base::paste(" ret = list()", sep=""), conn)
 	base::writeLines(base::paste(" ret$model = model", sep=""), conn)
 	base::writeLines(base::paste(" ret$eqn = eqn", sep=""), conn)
@@ -349,8 +352,8 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	base::writeLines(base::paste("\\end{verbatim}\n", sep=""), conn)
 
 	## PAGE 10
-	base::writeLines("\\newpage ## R Code to generate the upper-bound Shattering coeffient function\n", conn)
-	base::writeLines("The following R code employs all previous formulation to numerically estimate the upper bound for the Shattering coefficient function, given the exact computation is time intensive and leads to infinite values.\n", conn)
+	base::writeLines("\\newpage ## R Code to generate the upper-bound Shattering coefficient function\n", conn)
+	base::writeLines("The following R code employs all previous formulation to numerically estimate the upper bound for the Shattering coefficient function, given the exact computation is time intensive and leads to infinite values. We suggest the user to run the following code trying to increase as much as possible the value of variable n.end in attempt to estimate the shattering function for the greatest as possible sample size.\n", conn)
 	base::writeLines(base::paste("\\begin{verbatim}\n", sep=""), conn)
 	eqn = base::paste("h_n <- function(n) { return (", sprintf("%.5f", as.numeric(ret$number.hyperplanes$regression$coefficients[2])), " * n ", sep="")
 	if (sign(as.numeric(ret$number.hyperplanes$regression$coefficients[1])) >= 0) {
@@ -376,26 +379,28 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 
 		# Internal term
 		prod = base::paste(prod, "choose(max(c(big_O_power(beta, n)", sep="")
-		if (i > 1) {
-			prod = base::paste(prod, "-sum(c1:c", i, ")", sep="")
-		}
+		#if (i > 1) {
+		#prod = base::paste(prod, "-sum(c1:c", i, ")", sep="")
+		prod = base::paste(prod, subtract, sep="")
+		subtract = base::paste(subtract, "-c", i, sep="")
+		#}
 		prod = base::paste(prod, ", c",i,")), c", i, ")", sep="")
 		if (i < length(unique(Y))-1) {
 			txt = base::paste(txt, "\n", sep="")
 			prod = base::paste(prod, "*\n", spaces, " ", sep="")
 		}
 
-		if (i == 1) {
-			subtract = base::paste("-sum(c1:c", i, ")", sep="")
-		} else {
-			subtract = base::paste("-sum(c1:c", i-2, ")", sep="")
-		}
+		#if (i == 1) {
+		#	subtract = base::paste("-sum(c1:c", i, ")", sep="")
+		#} else {
+		#	subtract = base::paste("-sum(c1:c", i-2, ")", sep="")
+		#}
 		end = base::paste(end, pracma::strcat(rep(" ", length(unique(Y))-i+1)), "}\n", sep="")
 	}
 	base::writeLines(txt, conn)
 	base::writeLines(base::paste(spaces, "value = value * ", prod, sep=""), conn)
 	base::writeLines(base::paste(end, sep=""), conn)
-	base::writeLines(base::paste("  shat[counter,] = c(n, value)", sep=""), conn)
+	base::writeLines(base::paste("  shat[counter,] = c(n, value+1)", sep=""), conn)
 	base::writeLines(base::paste("  counter = counter + 1", sep=""), conn)
 	base::writeLines(base::paste(" }\n return (shat)\n}\n", sep=""), conn)
 
@@ -403,13 +408,61 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	base::writeLines(base::paste(" dataset = as.data.frame(shattering_upper_bound(beta, n.start, n.end, n.by))", sep=""), conn)
 	base::writeLines(base::paste(" if (plot) { plot(dataset) }", sep=""), conn)
 	base::writeLines(base::paste(" model = lm(log(V2) ~ V1, data=dataset)", sep=""), conn)
-	base::writeLines(base::paste(" eqn = paste(\"Shat_upper(n)=exp(\", as.numeric(model$coefficients[2]),\"*n + \",\n\t\t\tas.numeric(model$coefficients[1]), \")\", sep=\"\")", sep=""), conn)
+	base::writeLines(base::paste(" eqn = paste(\"exp(\", as.numeric(model$coefficients[2]),\"*n + \",\n\t\t\tas.numeric(model$coefficients[1]), \")\", sep=\"\")", sep=""), conn)
 	base::writeLines(base::paste(" ret = list()", sep=""), conn)
 	base::writeLines(base::paste(" ret$model = model", sep=""), conn)
 	base::writeLines(base::paste(" ret$eqn = eqn", sep=""), conn)
 	base::writeLines(base::paste(" return (ret)", sep=""), conn)
 	base::writeLines(base::paste("}", sep=""), conn)
 	base::writeLines(base::paste("\\end{verbatim}\n", sep=""), conn)
+
+	## PAGE 11
+	base::writeLines("\\newpage ## Estimating the shattering coefficient functions\n", conn)
+	base::writeLines("Next, you run the following code, after loading the two previous pages with R codes, increasing the value of n.end as much as possible in attempt to obtain a good estimation for both the lower and upper bounds for the shattering coefficient function:\n", conn)
+	base::writeLines(base::paste("\\begin{verbatim}\n", sep=""), conn)
+	base::writeLines(base::paste("lower_bound = model.shattering_lower_bound(n.end=250)", sep=""), conn)
+	base::writeLines(base::paste("upper_bound = model.shattering_upper_bound(n.end=250)", sep=""), conn)
+	base::writeLines(base::paste("\\end{verbatim}", sep=""), conn)
+	base::writeLines("For the best-case scenario, i.e., the lower bound, you can now consider the following function in the probabilistic representation of the empirical risk minimization principle and in the generalization bound:\n", conn)
+	base::writeLines(base::paste("\\begin{verbatim}\n", sep=""), conn)
+	base::writeLines(base::paste("print(lower$model)", sep=""), conn)
+	base::writeLines(base::paste("\\end{verbatim}", sep=""), conn)
+	base::writeLines("And for the worst-case scenario, i.e., the upper bound, you can now consider the following function in the probabilistic representation of the empirical risk minimization principle and in the generalization bound:\n", conn)
+	base::writeLines(base::paste("\\begin{verbatim}\n", sep=""), conn)
+	base::writeLines(base::paste("print(upper$model)", sep=""), conn)
+	base::writeLines(base::paste("\\end{verbatim}", sep=""), conn)
+
+	## PAGE 12
+	base::writeLines("\\newpage ## Employing the Empirical Risk Minimization Principle\n", conn)
+	base::writeLines("The Empirical Risk Minimization Principle (ERMP) is a direct result of the Statistical Learning Theory, whose formulation is given by:\n", conn)
+	base::writeLines(base::paste("$$P(\\sup_{f \\in \\mathcal{F}} |R_\\text{emp}(f)-R(f)| > \\epsilon) \\leq 2 \\mathcal{N}(\\mathcal{F},2n) \\exp{(-n \\epsilon^2 / 4)},$$\n", sep=""), conn)
+	base::writeLines("in which $n$ represents the sample size, $\\epsilon$ corresponds to the acceptable divergence in between the empirical risk $R_\\text{emp}(f) \\in [0,1]$ and the (expected) risk $R(f) \\in [0,1]$, $\\mathcal{N}(\\mathcal{F},2n)$ is the Shattering coefficient function.\n", conn)
+	base::writeLines(base::paste("After generating the lower and upper-bound Shattering coefficient models, we suggest you to take those two functions and apply as follows, assuming the lower-bound is $\\exp{(0.001n)}$ and the upper bound is $\\exp{(0.01n)}$:\n", sep=""), conn)
+	base::writeLines(base::paste("$$P_\\text{lower}(\\sup_{f \\in \\mathcal{F}} |R_\\text{emp}(f)-R(f)| > \\epsilon) \\leq 2 \\exp{(0.001 n)} \\exp{(-n \\epsilon^2 / 4)},$$\n", sep=""), conn)
+	base::writeLines(base::paste("$$P_\\text{upper}(\\sup_{f \\in \\mathcal{F}} |R_\\text{emp}(f)-R(f)| > \\epsilon) \\leq 2 \\exp{(0.01 n)} \\exp{(-n \\epsilon^2 / 4)},$$\n", sep=""), conn)
+	base::writeLines(base::paste("Therefore, $\\epsilon_\\text{lower} \\approx \\sqrt{4 \\times 0.001}$, while $\\epsilon_\\text{upper} \\approx \\sqrt{4 \\times 0.01}$.\n", sep=""), conn)
+	base::writeLines(base::paste("From this analysis, we have the minimal divergence $\\epsilon$ for which learning convergence is ensured. For example, given the empirical and the expected risks are in $[0,1]$, we wish to have a very small value for $\\epsilon$ approaching zero. If you wish to compare this dataset against another one devoted to solve the same classification task, $\\epsilon$ is a great factor for comparison. The smaller it is, the more separable (better) it is.\n", sep=""), conn)
+	base::writeLines(base::paste("The minimal training sample size to ensure learning is then resultant of the value $\\epsilon + \\zeta$, for any $\\zeta > 0$, thus leading to:\n", sep=""), conn)
+	base::writeLines(base::paste("$$P(\\sup_{f \\in \\mathcal{F}} |R_\\text{emp}(f)-R(f)| > \\epsilon) \\leq 2 \\exp{(-n \\zeta^2 / 4)},$$\n", sep=""), conn)
+	base::writeLines(base::paste("which you can simply solve for $n$ and find the minimal sample size to train your model, assuming:\n", sep=""), conn)
+	base::writeLines(base::paste("$$\\delta = 2 \\exp{(-n \\zeta^2 / 4)},$$\n", sep=""), conn)
+	base::writeLines(base::paste("given $\\delta$ is the probability you wish to ensure. For example, if $\\delta=0.05$, you have $95\\%$ of confidence for your learning guarantees. Suppose you assume $\\delta=0.05$, and you decided to set $\\zeta = 0.001$, then you will have:\n", sep=""), conn)
+	base::writeLines(base::paste("$$0.05 = 2 \\exp{(-n\\; 0.001^2 / 4)},$$\n", sep=""), conn)
+	base::writeLines(base::paste("$$n \\approx 1.47555 \\times 10^7,$$\n", sep=""), conn)
+	base::writeLines(base::paste("but maybe you decided to set $\\zeta = 0.01$, then you will need far less training examples:\n", sep=""), conn)
+	base::writeLines(base::paste("$$n \\approx 147,555.$$\n", sep=""), conn)
+
+	## PAGE 13
+	base::writeLines("\\newpage ## Employing the Generalization Bound\n", conn)
+	base::writeLines(base::paste("After generating the lower and upper-bound Shattering coefficient models, we suggest you to take those two functions and apply in the Generalization Bound:\n", sep=""), conn)
+	base::writeLines(base::paste("$$R(f) \\leq R_\\text{emp}(f) + \\sqrt{\\frac{4}{n} \\left( \\log{(2\\mathcal{N}(\\mathcal{F},2n))} - \\log{\\delta} \\right)}.$$\n", sep=""), conn)
+	base::writeLines(base::paste("Here we assume the lower-bound is $\\exp{(0.001n)}$ and the upper bound is $\\exp{(0.01n)}$, so that\n", sep=""), conn)
+	base::writeLines(base::paste("$$R_\\text{lower}(f) \\leq R_\\text{emp}(f) + \\sqrt{\\frac{4}{n} \\left( \\log{(2 \\exp{(0.001n)})} - \\log{\\delta} \\right)},$$\n", sep=""), conn)
+	base::writeLines(base::paste("$$R_\\text{upper}(f) \\leq R_\\text{emp}(f) + \\sqrt{\\frac{4}{n} \\left( \\log{(2 \\exp{(0.01n)})}- \\log{\\delta} \\right)},$$\n", sep=""), conn)
+	base::writeLines(base::paste("Then, assuming $\\delta = 0.05$ and solving for $n \\to \\infty$, we find:\n", sep=""), conn)
+	base::writeLines(base::paste("$$R_\\text{lower}(f) \\leq R_\\text{emp}(f) + 0.0632456$$\n", sep=""), conn)
+	base::writeLines(base::paste("$$R_\\text{upper}(f) \\leq R_\\text{emp}(f) + 0.2$$\n", sep=""), conn)
+	base::writeLines(base::paste("from which we conclude there is a perturbation around $6\\%$ when using the lower (best-case scenario) and $20\\%$ for the upper bound (worst-case scenario).\n", sep=""), conn)
 
 	base::close(conn)
 

@@ -1,6 +1,6 @@
 Package: shattering
 Title: Estimate the Shattering Coefficient for a Particular Dataset
-Version: 1.0.5
+Version: 1.0.6
 Authors@R: 
     person(given = "Rodrigo",
            family = "F. de Mello",
@@ -15,9 +15,9 @@ Imports: FNN, pdist, slam, grDevices, Ryacas, rmarkdown, pracma, e1071,
         graphics, NMF, stats
 Suggests: testthat
 NeedsCompilation: no
-Packaged: 2021-05-27 12:22:28 UTC; mello
+Packaged: 2021-06-02 18:29:34 UTC; mello
 Author: Rodrigo F. de Mello [aut, cre]
     (<https://orcid.org/0000-0002-0435-3992>)
 Maintainer: Rodrigo F. de Mello <mellorf@gmail.com>
 Repository: CRAN
-Date/Publication: 2021-05-28 05:40:03 UTC
+Date/Publication: 2021-06-02 23:00:02 UTC
