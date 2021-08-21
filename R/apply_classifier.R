@@ -1,3 +1,16 @@
+#' Apply a classifier induced with function build_classifier
+#'
+#' This function applies the set of SVM classifiers to perform the supervised learning task 
+#' based on the topological data analysis
+#' @param model model built using function build_classifier
+#' @param X matrix defining the input space of your test set
+#' @param only.best.classifiers if TRUE, only the most performing classification functions will be considered
+#' @return prediction results
+#' @keywords complexity analysis of the shattering coefficient for some dataset
+#' @section References: de Mello, R.F. (2019) "On the Shattering Coefficient of Supervised Learning Algorithms" arXiv:<https://arxiv.org/abs/1911.05461>
+#' @section References: de Mello, R.F., Ponti, M.A. (2018, ISBN: 978-3319949888) "Machine Learning: A Practical Approach on the Statistical Learning Theory"
+#'
+#' @export
 apply_classifier <- function(model, X, only.best.classifiers=FALSE) {
 
 	if (!is.matrix(X)) {

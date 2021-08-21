@@ -127,22 +127,28 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 
 	## PAGE 4
 	base::writeLines("\\newpage ## Shattering coefficient estimation\n", conn)
-	base::writeLines("From the lower and the upper bounds of the number of hyperplanes, we obtain the number of space regions (half spaces) produced by those hyperplanes as the sample size $n$ increases, in form:\n", conn)
-	base::writeLines(base::paste("$$2^{\\Omega(n^\\frac{2}{d+1} \\log \\log{n} / \\log{n})} = 2^{\\alpha h(n)^\\frac{2}{", ncol(X)+1, "} \\log \\log{h(n)} / \\log{h(n)}}$$\n", sep=""), conn)
-	lower_h_n = base::paste("2^Omega", sep="")
+	base::writeLines("We obtain the number of space regions produced by those $m$ hyperplanes on an $\\mathbb{R}^d$ space as the sample size $n$ increases, in form:\n", conn)
+	base::writeLines(base::paste("$$r(m,d) = 1 + \\sum_{i=0}^{d} \\binom{m}{i}$$", sep=""), conn)
+	base::writeLines("so, from the lower and the upper bounds of the number of hyperplanes, we have the following number of regions:\n", conn)
+	base::writeLines(base::paste("$$r_\\text{lower}(\\Omega(n^\\frac{2}{d+1} \\log \\log{n} / \\log{n}), d) = r_\\text{lower}(\\alpha h(n)^\\frac{2}{", ncol(X)+1, "} \\log \\log{h(n)} / \\log{h(n)},", ncol(X), ")$$\n", sep=""), conn)
+	lower_h_n = base::paste("r(Omega,", ncol(X), ")", sep="")
+	#lower_h_n = base::paste("1+Sum(i,0,", nrow(X), ",Bin(Omega,i))", sep="")
+	#lower_h_n = base::paste("r_\\text{lower}(Omega,d)", sep="")
 
-	full_lower_h_n = base::paste("2^(1 * (", ncol(X), "*", t_h_n, ")^(2/(", ncol(X)+1, ")) * Ln(Ln(", t_h_n, ")) / Ln(", t_h_n,"))", sep="")
-	full_upper_h_n = base::paste("2^(1 * (", ncol(X), "*", t_h_n, ")^(2/(", ncol(X)+1, ")))", sep="") 
+	full_lower_h_n = base::paste("1+Sum(i,0,", ncol(X), ",Bin(1 * (", ncol(X), "*", t_h_n, ")^(2/(", ncol(X)+1, ")) * Ln(Ln(", t_h_n, ")) / Ln(", t_h_n,"), i))", sep="")
+	full_upper_h_n = base::paste("1+Sum(i,0,", ncol(X), ",Bin(1 * (", ncol(X), "*", t_h_n, ")^(2/(", ncol(X)+1, ")),i))", sep="") 
 
-	base::writeLines(base::paste("$$2^{O(d n^\\frac{2}{d+1})} = 2^{\\beta h(n)^\\frac{2}{", ncol(X)+1, "}}$$\n", sep=""), conn)
-	upper_h_n = base::paste("2^O", sep="")
+	base::writeLines(base::paste("$$r_\\text{upper}(O(d n^\\frac{2}{d+1}), d) = r_\\text{upper}(\\beta h(n)^\\frac{2}{", ncol(X)+1, "},", ncol(X), ")$$\n", sep=""), conn)
+	upper_h_n = base::paste("r(O,", ncol(X), ")", sep="")
+	#upper_h_n = base::paste("1+Sum(i,0,", nrow(X), ",Bin(O,i))", sep="")
+	#upper_h_n = base::paste("r_\\text{upper}(O,d)", sep="")
 	base::writeLines("given each hyperplane divides the input space into two halves.\n", conn)
 	base::writeLines("As next step, we compute the Shattering coefficient function using the following inequality, proven in [\\textcolor{blue}{our paper}](https://arxiv.org/pdf/1911.05461.pdf):\n", conn)
-	base::writeLines("$$\\mathcal{N}(\\mathcal{F},2n) \\leq 1 + \\sum_{c_1=1}^{2^m} \\sum_{c_2=1}^{2^m-c_1} \\ldots \\sum_{c_{C-1}=1}^{2^m-c_1-c_2\\ldots-c_{C-2}} \\binom{2^m}{c_1} \\times \\binom{2^m-c_1}{c_2}\\times \\ldots \\times \\binom{2^m-c_1-c_2\\ldots-c_{C-2}}{c_{C-1}}$$\n", conn)
+	base::writeLines("\\begin{small}$$\\mathcal{N}(\\mathcal{F},2n) \\leq 1 + \\sum_{c_1=1}^{r(m,d)} \\sum_{c_2=1}^{r(m,d)-c_1} \\ldots \\sum_{c_{C-1}=1}^{r(m,d)-c_1-c_2\\ldots-c_{C-2}} \\binom{r(m,d)}{c_1} \\times \\binom{r(m,d)-c_1}{c_2}\\times \\ldots \\times \\binom{r(m,d)-c_1-c_2\\ldots-c_{C-2}}{c_{C-1}}$$\\end{small}\n", conn)
 	base::writeLines("From that, we define the lower and upper bounds for the Shattering coefficient function as follows:\n", conn)
-	base::writeLines("$$1+\\sum_{c_1=1}^{2^{\\Omega}} \\sum_{c_2=1}^{2^\\Omega-c_1} \\ldots \\sum_{c_{C-1}=1}^{2^\\Omega-c_1-c_2\\ldots-c_{C-2}} \\binom{2^{\\Omega}}{c_1} \\times \\binom{2^{\\Omega}-c_1}{c_2}\\times \\ldots \\times \\binom{2^{\\Omega}-c_1-c_2\\ldots-c_{C-2}}{c_{C-1}}$$\n", conn)
-	base::writeLines("$$\\leq \\mathcal{N}(\\mathcal{F},2n) \\leq$$\n", conn)
-	base::writeLines("$$1+\\sum_{c_1=1}^{2^{O}} \\sum_{c_2=1}^{2^{O}-c_1} \\ldots \\sum_{c_{C-1}=1}^{2^{O}-c_1-c_2\\ldots-c_{C-2}} \\binom{2^{O}}{c_1} \\times \\binom{2^{O}-c_1}{c_2}\\times \\ldots \\times \\binom{2^{O}-c_1-c_2\\ldots-c_{C-2}}{c_{C-1}},$$", conn)
+	base::writeLines("\\begin{footnotesize}$$1+\\sum_{c_1=1}^{r_\\text{lower}(\\Omega,d)} \\sum_{c_2=1}^{r_\\text{lower}(\\Omega,d)-c_1} \\ldots \\sum_{c_{C-1}=1}^{r_\\text{lower}(\\Omega,d)-c_1-c_2\\ldots-c_{C-2}} \\binom{r_\\text{lower}(\\Omega,d)}{c_1} \\times \\binom{r_\\text{lower}(\\Omega,d)-c_1}{c_2}\\times \\ldots \\times \\binom{r_\\text{lower}(\\Omega,d)-c_1-c_2\\ldots-c_{C-2}}{c_{C-1}}$$\\end{footnotesize}\n", conn)
+	base::writeLines("\\begin{footnotesize}$$\\leq \\mathcal{N}(\\mathcal{F},2n) \\leq$$\\end{footnotesize}\n", conn)
+	base::writeLines("\\begin{footnotesize}$$1+\\sum_{c_1=1}^{r_\\text{upper}(O,d)} \\sum_{c_2=1}^{r_\\text{upper}(O,d)-c_1} \\ldots \\sum_{c_{C-1}=1}^{r_\\text{upper}(O,d)-c_1-c_2\\ldots-c_{C-2}} \\binom{r_\\text{upper}(O,d)}{c_1} \\times \\binom{r_\\text{upper}(O,d)-c_1}{c_2}\\times \\ldots \\times \\binom{r_\\text{upper}(O,d)-c_1-c_2\\ldots-c_{C-2}}{c_{C-1}},$$\\end{footnotesize}", conn)
 	base::writeLines(base::paste("considering $C$ classes in our problem ($C=", length(unique(Y)), "$ for this dataset) and using $\\Omega$ and $O$ for short.\n", sep=""), conn)
 
 	###########################
@@ -290,6 +296,7 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	base::writeLines("\\newpage ## R Code to generate the lower-bound Shattering coefficient function\n", conn)
 	base::writeLines("The following R code employs all previous formulation to numerically estimate the lower bound for the Shattering coefficient function, given the exact computation is time intensive and leads to infinite values. We suggest the user to run the following code trying to increase as much as possible the value of variable n.end in attempt to estimate the shattering function for the greatest as possible sample size.\n", conn)
 	base::writeLines(base::paste("\\begin{verbatim}\n", sep=""), conn)
+	base::writeLines(base::paste("require(shattering)\n", sep=""), conn)
 	eqn = base::paste("h_n <- function(n) { return (", sprintf("%.5f", as.numeric(ret$number.hyperplanes$regression$coefficients[2])), " * n ", sep="")
 	if (sign(as.numeric(ret$number.hyperplanes$regression$coefficients[1])) >= 0) {
 		eqn = base::paste(eqn, "+", sep="")
@@ -298,22 +305,22 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	}
 	eqn = base::paste(eqn, sprintf("%.5f", abs(as.numeric(ret$number.hyperplanes$regression$coefficients[1]))), ") }\n", sep="")
 	base::writeLines(eqn, conn)
-	base::writeLines(base::paste("big_Omega_power <- function(alpha, n, power=", 2/(ncol(X)+1), ") {\n return (2^(alpha*h_n(n)^power * log(log(h_n(n)))/log(h_n(n))))\n }\n", sep=""), conn)
+	base::writeLines(base::paste("big_Omega_power <- function(alpha, n, d=", ncol(X), ", power=", 2/(ncol(X)+1), ") {\n return (number_regions(alpha*h_n(n)^power * log(log(h_n(n)))/log(h_n(n)), d))\n}\n", sep=""), conn)
 
 	###########################
 	# Defining the lower bound
 	###########################
-	txt = base::paste("shattering_lower_bound <- function(alpha, n.start, n.end, n.by, power=", 2/(ncol(X)+1), ") {\n counter = 1\n shat = matrix(0, nrow=length(seq(n.start, n.end, by=n.by)), ncol=2)\n for (n in seq(n.start, n.end, by=n.by)) {\n  value = 1\n", sep="")
+	txt = base::paste("shattering_lower_bound <- function(alpha, n.start, n.end, n.by, d=", ncol(X), ", power=", 2/(ncol(X)+1), ") {\n counter = 1\n shat = matrix(0, nrow=length(seq(n.start, n.end, by=n.by)), ncol=2)\n for (n in seq(n.start, n.end, by=n.by)) {\n  value = 1\n", sep="")
 	prod = ""
 	subtract = ""
 	spaces = pracma::strcat(rep(" ", length(unique(Y))+2))
 	end = ""
 	for (i in 1:(length(unique(Y))-1)) {
 		# Sum terms
-		txt = base::paste(txt, pracma::strcat(rep(" ", i+1)), "for (c",i," in 1:round(max(c(big_Omega_power(alpha, n, power)", subtract, ", 1)))) {", sep="")
+		txt = base::paste(txt, pracma::strcat(rep(" ", i+1)), "for (c",i," in 1:round(max(c(big_Omega_power(alpha, n, d, power)", subtract, ", 1)))) {", sep="")
 
 		# Internal term
-		prod = base::paste(prod, "choose(max(c(big_Omega_power(alpha, n)", sep="")
+		prod = base::paste(prod, "choose(max(c(big_Omega_power(alpha, n, d, power)", sep="")
 		#if (i > 1) {
 		#prod = base::paste(prod, "-sum(c1:c", i, ")", sep="")
 		prod = base::paste(prod, subtract, sep="")
@@ -339,8 +346,8 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	base::writeLines(base::paste("  counter = counter + 1", sep=""), conn)
 	base::writeLines(base::paste(" }\n return (shat)\n}\n", sep=""), conn)
 
-	base::writeLines(base::paste("model.shattering_lower_bound <- function(alpha=1, n.start=", nrow(X), ",\n\t\tn.end=", nrow(X)+100, ", n.by=1, plot=TRUE) {", sep=""), conn)
-	base::writeLines(base::paste(" dataset = as.data.frame(shattering_lower_bound(alpha, n.start, n.end, n.by))", sep=""), conn)
+	base::writeLines(base::paste("model.shattering_lower_bound <- function(alpha=1, n.start=", nrow(X), ",\n\t\tn.end=", nrow(X)+100, ", n.by=1, d=", ncol(X), ", power=", 2/(ncol(X)+1), ", plot=TRUE) {", sep=""), conn)
+	base::writeLines(base::paste(" dataset = as.data.frame(shattering_lower_bound(alpha, n.start, n.end, n.by, d, power))", sep=""), conn)
 	base::writeLines(base::paste(" if (plot) { plot(dataset) }", sep=""), conn)
 	base::writeLines(base::paste(" model = lm(log(V2) ~ V1, data=dataset)", sep=""), conn)
 	base::writeLines(base::paste(" eqn = paste(\"exp(\", as.numeric(model$coefficients[2]),\"*n + \",\n\t\t\tas.numeric(model$coefficients[1]), \")\", sep=\"\")", sep=""), conn)
@@ -355,6 +362,7 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	base::writeLines("\\newpage ## R Code to generate the upper-bound Shattering coefficient function\n", conn)
 	base::writeLines("The following R code employs all previous formulation to numerically estimate the upper bound for the Shattering coefficient function, given the exact computation is time intensive and leads to infinite values. We suggest the user to run the following code trying to increase as much as possible the value of variable n.end in attempt to estimate the shattering function for the greatest as possible sample size.\n", conn)
 	base::writeLines(base::paste("\\begin{verbatim}\n", sep=""), conn)
+	base::writeLines(base::paste("require(shattering)\n", sep=""), conn)
 	eqn = base::paste("h_n <- function(n) { return (", sprintf("%.5f", as.numeric(ret$number.hyperplanes$regression$coefficients[2])), " * n ", sep="")
 	if (sign(as.numeric(ret$number.hyperplanes$regression$coefficients[1])) >= 0) {
 		eqn = base::paste(eqn, "+", sep="")
@@ -363,22 +371,22 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	}
 	eqn = base::paste(eqn, sprintf("%.5f", abs(as.numeric(ret$number.hyperplanes$regression$coefficients[1]))), ") }\n", sep="")
 	base::writeLines(eqn, conn)
-	base::writeLines(base::paste("big_O_power <- function(beta, n, power=", 2/(ncol(X)+1), ") {\n return (2^(beta*h_n(n)^power))\n }\n", sep=""), conn)
+	base::writeLines(base::paste("big_O_power <- function(beta, n, d=", ncol(X), ", power=", 2/(ncol(X)+1), ") {\n return (number_regions(beta*h_n(n)^power, d))\n}\n", sep=""), conn)
 
 	###########################
 	# Defining the upper bound
 	###########################
-	txt = base::paste("shattering_upper_bound <- function(beta, n.start, n.end, n.by, power=", 2/(ncol(X)+1), ") {\n counter = 1\n shat = matrix(0, nrow=length(seq(n.start, n.end, by=n.by)), ncol=2)\n for (n in seq(n.start, n.end, by=n.by)) {\n  value = 1\n", sep="")
+	txt = base::paste("shattering_upper_bound <- function(beta, n.start, n.end, n.by, d=", ncol(X), ", power=", 2/(ncol(X)+1), ") {\n counter = 1\n shat = matrix(0, nrow=length(seq(n.start, n.end, by=n.by)), ncol=2)\n for (n in seq(n.start, n.end, by=n.by)) {\n  value = 1\n", sep="")
 	prod = ""
 	subtract = ""
 	spaces = pracma::strcat(rep(" ", length(unique(Y))+2))
 	end = ""
 	for (i in 1:(length(unique(Y))-1)) {
 		# Sum terms
-		txt = base::paste(txt, pracma::strcat(rep(" ", i+1)), "for (c",i," in 1:round(max(c(big_O_power(beta, n, power)", subtract, ", 1)))) {", sep="")
+		txt = base::paste(txt, pracma::strcat(rep(" ", i+1)), "for (c",i," in 1:round(max(c(big_O_power(beta, n, d, power)", subtract, ", 1)))) {", sep="")
 
 		# Internal term
-		prod = base::paste(prod, "choose(max(c(big_O_power(beta, n)", sep="")
+		prod = base::paste(prod, "choose(max(c(big_O_power(beta, d, n, power)", sep="")
 		#if (i > 1) {
 		#prod = base::paste(prod, "-sum(c1:c", i, ")", sep="")
 		prod = base::paste(prod, subtract, sep="")
@@ -404,8 +412,8 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	base::writeLines(base::paste("  counter = counter + 1", sep=""), conn)
 	base::writeLines(base::paste(" }\n return (shat)\n}\n", sep=""), conn)
 
-	base::writeLines(base::paste("model.shattering_upper_bound <- function(beta=1, n.start=", nrow(X), ",\n\t\tn.end=", nrow(X)+100, ", n.by=1, plot=TRUE) {", sep=""), conn)
-	base::writeLines(base::paste(" dataset = as.data.frame(shattering_upper_bound(beta, n.start, n.end, n.by))", sep=""), conn)
+	base::writeLines(base::paste("model.shattering_upper_bound <- function(beta=1, n.start=", nrow(X), ",\n\t\tn.end=", nrow(X)+100, ", n.by=1, d=", ncol(X), ", power=", 2/(ncol(X)+1), ", plot=TRUE) {", sep=""), conn)
+	base::writeLines(base::paste(" dataset = as.data.frame(shattering_upper_bound(beta, n.start, n.end, n.by, d, power))", sep=""), conn)
 	base::writeLines(base::paste(" if (plot) { plot(dataset) }", sep=""), conn)
 	base::writeLines(base::paste(" model = lm(log(V2) ~ V1, data=dataset)", sep=""), conn)
 	base::writeLines(base::paste(" eqn = paste(\"exp(\", as.numeric(model$coefficients[2]),\"*n + \",\n\t\t\tas.numeric(model$coefficients[1]), \")\", sep=\"\")", sep=""), conn)
@@ -425,11 +433,11 @@ complexity_analysis <- function(X=NULL, Y=NULL, my.delta=0.05, my.epsilon=0.05,
 	base::writeLines(base::paste("\\end{verbatim}", sep=""), conn)
 	base::writeLines("For the best-case scenario, i.e., the lower bound, you can now consider the following function in the probabilistic representation of the empirical risk minimization principle and in the generalization bound:\n", conn)
 	base::writeLines(base::paste("\\begin{verbatim}\n", sep=""), conn)
-	base::writeLines(base::paste("print(lower$model)", sep=""), conn)
+	base::writeLines(base::paste("print(lower_bound$model)", sep=""), conn)
 	base::writeLines(base::paste("\\end{verbatim}", sep=""), conn)
 	base::writeLines("And for the worst-case scenario, i.e., the upper bound, you can now consider the following function in the probabilistic representation of the empirical risk minimization principle and in the generalization bound:\n", conn)
 	base::writeLines(base::paste("\\begin{verbatim}\n", sep=""), conn)
-	base::writeLines(base::paste("print(upper$model)", sep=""), conn)
+	base::writeLines(base::paste("print(upper_bound$model)", sep=""), conn)
 	base::writeLines(base::paste("\\end{verbatim}", sep=""), conn)
 
 	## PAGE 12
